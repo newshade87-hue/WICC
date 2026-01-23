@@ -202,6 +202,8 @@ const App: React.FC = () => {
         </div>
       </div>
 
+      <RosterWidget blueMembers={blueMembers} orangeMembers={orangeMembers} />
+
       {/* Action Bar Removed from here, moved to bottom */}
 
       <div className="versus-bar">
