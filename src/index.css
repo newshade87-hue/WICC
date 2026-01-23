@@ -671,27 +671,29 @@ select {
 /* Bottom Action Bar */
 .bottom-bar {
   position: fixed;
-  bottom: 0;
+  bottom: 0px;
   left: 0;
   right: 0;
-  background: rgba(15, 23, 42, 0.9);
+  background: rgba(15, 23, 42, 0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 0.75rem 1rem;
+  padding: 0.4rem 0.6rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
   z-index: 1000;
-  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.8);
 }
 
 .bottom-bar .btn-outline {
-  padding: 0.5rem 1rem;
-  font-size: 0.65rem;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.6rem;
   flex: 1;
-  max-width: 150px;
+  max-width: 100px;
+  height: 32px;
+  border-width: 1px;
 }
 
 /* History View Styles */
@@ -726,21 +728,34 @@ select {
   .grid-3 {
     grid-template-columns: repeat(3, 1fr);
     overflow-x: hidden;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .form-row {
-    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
   }
 
   .awards-grid {
-    flex-wrap: wrap;
-    gap: 0.75rem;
+    display: flex;
+    overflow-x: auto;
+    flex-wrap: nowrap !important;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
   }
 
   .award-item {
-    flex: 1 1 45%;
+    flex: 0 0 160px;
+    padding: 0.75rem;
+    border-radius: 12px;
+  }
+
+  .members-grid {
+    display: flex;
+    overflow-x: auto;
+    flex-wrap: nowrap !important;
+    gap: 1rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .member-card {
+    flex: 0 0 280px;
     padding: 1rem;
   }
 }
