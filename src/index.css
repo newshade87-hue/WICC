@@ -671,8 +671,19 @@ select {
 /* Mobile Responsiveness */
 @media (max-width: 1024px) {
   .grid-3 {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(280px, 1fr));
+    overflow-x: auto;
+    padding-bottom: 1rem;
     gap: 1rem;
+  }
+
+  .grid-3::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .grid-3::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
   }
 
   .form-row {
@@ -707,11 +718,21 @@ select {
   }
 
   .card-value {
-    font-size: 4rem;
+    font-size: 3rem;
   }
 
   .card-status {
-    font-size: 2rem;
+    font-size: 1.5rem;
+  }
+
+  .card-label {
+    font-size: 0.55rem;
+    margin-bottom: 1rem;
+  }
+
+  .card {
+    padding: 1.5rem 1rem;
+    min-width: 280px;
   }
 
   .flex-between {

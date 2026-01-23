@@ -63,12 +63,20 @@ const App: React.FC = () => {
 
   const takeScreenshot = async () => {
     const element = document.body;
+    // Capture at a consistent width even on mobile to get the full desktop layout in the screenshot
+    const captureWidth = 1440;
     const canvas = await html2canvas(element, {
       backgroundColor: '#020617',
       useCORS: true,
       scale: 2,
-      windowWidth: element.scrollWidth,
-      windowHeight: element.scrollHeight,
+      windowWidth: captureWidth,
+      onclone: (clonedDoc) => {
+        const container = clonedDoc.querySelector('.container') as HTMLElement;
+        if (container) {
+          container.style.width = `${captureWidth}px`;
+          container.style.maxWidth = 'none';
+        }
+      },
       ignoreElements: (el) => el.classList.contains('btn-snapshot-hide') || el.tagName === 'BUTTON'
     });
     const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
