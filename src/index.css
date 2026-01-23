@@ -668,6 +668,40 @@ select {
   box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
 }
 
+/* Roster Widget */
+.roster-widget {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1rem;
+  margin-top: 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.team-roster-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.roster-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.roster-item-small {
+  font-size: 0.7rem;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  color: #f8fafc;
+}
+
 /* Bottom Action Bar */
 .bottom-bar {
   position: fixed;

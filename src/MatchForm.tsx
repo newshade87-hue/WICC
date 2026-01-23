@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 import { WICC_MEMBERS, calculatePoints } from './types';
 import type { MatchData, MatchFormat } from './types';
-import { X } from 'lucide-react';
+import { X, Calendar as CalendarIcon } from 'lucide-react';
 
 interface MatchFormProps {
     onSave: () => void;
@@ -122,7 +122,9 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
                 {/* Row 1 */}
                 <div className={`form-row ${format === '2-Innings' ? 'form-row-9' : 'form-row-8'}`}>
                     <div className="form-group">
-                        <label className="form-label orbitron">MATCH DATE</label>
+                        <label className="form-label orbitron" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <CalendarIcon size={12} color="var(--accent-cyan)" /> MATCH DATE
+                        </label>
                         <input type="date" value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} />
                     </div>
                     <div className="form-group">

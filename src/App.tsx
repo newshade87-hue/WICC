@@ -9,6 +9,8 @@ import { Trash2, Edit2, Download, RotateCcw, Camera, History } from 'lucide-reac
 import wiccLogo from './assets/wicc_logo.png';
 import html2canvas from 'html2canvas';
 import { HistoryView } from './HistoryView';
+import { RosterWidget } from './RosterWidget';
+import type { TeamMember } from './types';
 
 const App: React.FC = () => {
   const [matches, setMatches] = useState<MatchData[]>([]);
@@ -17,6 +19,8 @@ const App: React.FC = () => {
   const [teamTwoName, setTeamTwoName] = useState('TEAM ORANGE');
   const [editingMatch, setEditingMatch] = useState<MatchData | null>(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [blueMembers, setBlueMembers] = useState<TeamMember[]>([]);
+  const [orangeMembers, setOrangeMembers] = useState<TeamMember[]>([]);
 
   const fetchData = async () => {
     const { data: mData } = await supabase
@@ -32,8 +36,16 @@ const App: React.FC = () => {
       .limit(1)
       .single();
 
+    const { data: memData } = await supabase
+      .from('wicc_members')
+      .select('*');
+
     if (mData) setMatches(mData);
     if (sData) setSeriesInfo(sData);
+    if (memData) {
+      setBlueMembers(memData.filter(m => m.team === 'blue'));
+      setOrangeMembers(memData.filter(m => m.team === 'orange'));
+    }
   };
 
   useEffect(() => {
