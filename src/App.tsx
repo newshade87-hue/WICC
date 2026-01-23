@@ -125,7 +125,7 @@ const App: React.FC = () => {
           <span className="card-label orbitron">{teamOneName} POINTS</span>
           <span className="card-value orbitron text-white">{totals.ptsA}</span>
         </div>
-        <div className="card card-center">
+        <div className={`card card-center ${totals.ptsA > totals.ptsB ? 'leading-blue' : totals.ptsB > totals.ptsA ? 'leading-orange' : ''}`}>
           <span className="card-label orbitron">SERIES STATUS</span>
           <span className="card-status orbitron text-white">{champion || inLead}</span>
           <div className="card-label orbitron" style={{ marginTop: '1rem' }}>TARGET: 10 PTS</div>
@@ -180,7 +180,7 @@ const App: React.FC = () => {
               <th style={{ textAlign: 'center' }}>PTS</th>
               <th style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '7px', opacity: 0.7 }}>AWARDS HUB</div>
-                PLAYERS
+                MOM / MoIs
               </th>
               <th style={{ textAlign: 'center' }}>ACTIONS</th>
             </tr>
@@ -200,7 +200,7 @@ const App: React.FC = () => {
                 </td>
                 <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{m.teamonepoints}-{m.teamtwopoints}</td>
                 <td style={{ textAlign: 'center' }}>
-                  <div className="orbitron" style={{ color: '#ffcc00', fontSize: '11px', fontWeight: '900', textShadow: '0 0 10px rgba(255,204,0,0.3)' }}>{m.mom}</div>
+                  <div className="orbitron" style={{ color: '#ffcc00', fontSize: '11px', fontWeight: '900', textShadow: '0 0 10px rgba(255,204,0,0.3)' }}>MOM: {m.mom || 'PENDING'}</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', justifyContent: 'center', marginTop: '0.4rem' }}>
                     {m.moi1 && (
                       <span style={{
@@ -212,7 +212,7 @@ const App: React.FC = () => {
                         border: '1px solid rgba(0,229,255,0.2)',
                         fontWeight: 'bold'
                       }}>
-                        {m.moi1}
+                        MoI 1: {m.moi1}
                       </span>
                     )}
                     {m.moi2 && (
@@ -225,7 +225,7 @@ const App: React.FC = () => {
                         border: '1px solid rgba(255,115,0,0.2)',
                         fontWeight: 'bold'
                       }}>
-                        {m.moi2}
+                        MoI 2: {m.moi2}
                       </span>
                     )}
                   </div>

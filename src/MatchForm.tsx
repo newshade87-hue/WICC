@@ -109,9 +109,18 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
                 )}
             </div>
 
-            <form onSubmit={handleSubmit}>
+            <datalist id="members-list">
+                {WICC_MEMBERS.map(m => <option key={m} value={m} />)}
+            </datalist>
+
+            <form onSubmit={handleSubmit} onKeyDown={(e) => {
+                if (e.key === 'Enter' && e.target instanceof HTMLInputElement && e.target.type !== 'submit') {
+                    e.preventDefault();
+                    handleSubmit(e as any);
+                }
+            }}>
                 {/* Row 1 */}
-                <div className="form-row" style={{ gridTemplateColumns: format === '2-Innings' ? 'repeat(9, 1fr)' : 'repeat(8, 1fr)' }}>
+                <div className={`form-row ${format === '2-Innings' ? 'form-row-9' : 'form-row-8'}`}>
                     <div className="form-group">
                         <label className="form-label orbitron">MATCH DATE</label>
                         <input type="date" value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} />
@@ -177,24 +186,15 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
                     </div>
                     <div className="form-group">
                         <label className="form-label orbitron">MOM ENTRY</label>
-                        <select value={formData.mom} onChange={e => setFormData({ ...formData, mom: e.target.value })}>
-                            <option value="">SELECT PLAYER</option>
-                            {WICC_MEMBERS.map(m => <option key={m} value={m}>{m}</option>)}
-                        </select>
+                        <input list="members-list" value={formData.mom} onChange={e => setFormData({ ...formData, mom: e.target.value })} placeholder="SELECT OR TYPE..." />
                     </div>
                     <div className="form-group">
                         <label className="form-label orbitron">MOI ENTRY 1</label>
-                        <select value={formData.moi1} onChange={e => setFormData({ ...formData, moi1: e.target.value })}>
-                            <option value="">SELECT PLAYER</option>
-                            {WICC_MEMBERS.map(m => <option key={m} value={m}>{m}</option>)}
-                        </select>
+                        <input list="members-list" value={formData.moi1} onChange={e => setFormData({ ...formData, moi1: e.target.value })} placeholder="SELECT OR TYPE..." />
                     </div>
                     <div className="form-group">
                         <label className="form-label orbitron">MOI ENTRY 2</label>
-                        <select value={formData.moi2} onChange={e => setFormData({ ...formData, moi2: e.target.value })}>
-                            <option value="">SELECT PLAYER</option>
-                            {WICC_MEMBERS.map(m => <option key={m} value={m}>{m}</option>)}
-                        </select>
+                        <input list="members-list" value={formData.moi2} onChange={e => setFormData({ ...formData, moi2: e.target.value })} placeholder="SELECT OR TYPE..." />
                     </div>
                     <div className="form-group" style={{ gridColumn: 'span 1' }}>
                         <label className="form-label orbitron" style={{ color: '#00a2ff' }}>{teamOneName} PTS</label>
