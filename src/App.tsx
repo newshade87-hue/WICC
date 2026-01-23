@@ -5,7 +5,7 @@ import { AwardsHub } from './AwardsHub';
 import { ExportTool } from './ExportTool';
 import { MembersHub } from './MembersHub';
 import type { MatchData } from './types';
-import { Trophy, Users, Activity, FileSpreadsheet, RotateCcw } from 'lucide-react';
+import { FileSpreadsheet, RotateCcw } from 'lucide-react';
 
 const App: React.FC = () => {
   const [matches, setMatches] = useState<MatchData[]>([]);
@@ -42,112 +42,99 @@ const App: React.FC = () => {
   const inLead = totals.ptsA > totals.ptsB ? 'TEAM BLUE' : totals.ptsB > totals.ptsA ? 'TEAM ORANGE' : 'DRAW';
 
   return (
-    <div className="max-w-7xl mx-auto p-4 md:p-8">
+    <div className="max-w-[1400px] mx-auto p-4 md:p-12">
       {/* Header Section */}
-      <header className="text-center mb-12">
-        <h1 className="logo-main orbitron mb-0">WICC</h1>
-        <div className="flex items-center justify-center gap-4 -mt-4">
-          <div className="h-1.5 w-16 bg-gradient-to-r from-transparent to-cyan-500 rounded-full"></div>
-          <span className="orbitron text-[10px] tracking-[0.5em] text-cyan-500 font-bold uppercase">Premier Recorder</span>
-          <div className="h-1.5 w-16 bg-gradient-to-l from-transparent to-orange-500 rounded-full"></div>
+      <header className="relative text-center mb-16 pt-8">
+        <button className="absolute top-0 right-0 py-1.5 px-4 bg-slate-900 border border-slate-800 text-slate-500 rounded text-[9px] orbitron font-bold">VIEW HISTORY</button>
+        <h1 className="logo-main orbitron leading-none">WICC</h1>
+        <div className="flex items-center justify-center gap-4 mt-2">
+          <div className="h-1 w-10 bg-blue-500 rounded-full"></div>
+          <span className="orbitron text-[10px] tracking-[0.6em] text-cyan-400 font-bold">PREMIER RECORDER</span>
+          <div className="h-1 w-10 bg-orange-500 rounded-full"></div>
         </div>
       </header>
 
-      {/* Top Scorecards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-        {/* Team Blue Total */}
-        <div className="card-glass p-8 card-blue text-center flex flex-col justify-center min-h-[160px]">
-          <span className="orbitron text-[10px] text-cyan-500 mb-2 uppercase tracking-widest font-bold">Team Blue</span>
-          <span className="text-7xl orbitron font-black text-white">{totals.ptsA}</span>
+      {/* Top Cards Row */}
+      <div className="flex flex-col md:flex-row gap-6 mb-16">
+        {/* Team Blue Card */}
+        <div className="flex-1 card-glass p-10 card-blue text-center">
+          <span className="orbitron text-[10px] text-slate-400 mb-6 block font-bold tracking-[0.2em]">TEAM BLUE</span>
+          <span className="text-8xl orbitron font-black text-white">{totals.ptsA}</span>
         </div>
 
-        {/* Target / Status */}
-        <div className="card-glass p-8 card-center text-center flex flex-col justify-center min-h-[160px] border-slate-700">
-          <span className="orbitron text-[10px] text-slate-500 mb-4 uppercase tracking-widest font-bold">Target: 10 Pts</span>
-          <span className={`text-4xl orbitron font-bold tracking-widest ${inLead === 'DRAW' ? 'text-white' : inLead === 'TEAM BLUE' ? 'text-cyan-400' : 'text-orange-400'}`}>
-            {champion ? 'WINNER' : inLead}
+        {/* Middle Card */}
+        <div className="flex-1 card-glass p-10 card-center text-center">
+          <span className="orbitron text-[10px] text-slate-400 mb-6 block font-bold tracking-[0.2em]">TARGET: 10 PTS</span>
+          <span className={`text-5xl orbitron font-black tracking-widest text-slate-100`}>
+            {champion || inLead}
           </span>
         </div>
 
-        {/* Team Orange Total */}
-        <div className="card-glass p-8 card-orange text-center flex flex-col justify-center min-h-[160px]">
-          <span className="orbitron text-[10px] text-orange-500 mb-2 uppercase tracking-widest font-bold">Team Orange</span>
-          <span className="text-7xl orbitron font-black text-white">{totals.ptsB}</span>
+        {/* Team Orange Card */}
+        <div className="flex-1 card-glass p-10 card-orange text-center">
+          <span className="orbitron text-[10px] text-slate-400 mb-6 block font-bold tracking-[0.2em]">TEAM ORANGE</span>
+          <span className="text-8xl orbitron font-black text-white">{totals.ptsB}</span>
         </div>
       </div>
 
-      {/* Global Actions Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-6 mb-8">
-        <div className="flex gap-4">
-          <button className="px-6 py-2 border border-cyan-800 bg-cyan-900/20 text-cyan-400 orbitron text-[10px] rounded hover:bg-cyan-900/40 transition-all flex items-center gap-2">
-            <FileSpreadsheet className="w-3.5 h-3.5" /> EXCEL
-          </button>
-          <button className="px-6 py-2 border border-red-800 bg-red-900/20 text-red-500 orbitron text-[10px] rounded hover:bg-red-900/40 transition-all flex items-center gap-2">
-            <RotateCcw className="w-3.5 h-3.5" /> RESET
-          </button>
+      {/* Middle Action Bar */}
+      <div className="flex items-center justify-between mb-10">
+        <div className="flex gap-2">
+          <button className="btn-outline btn-blue-outline font-black">EXCEL</button>
+          <button className="btn-outline btn-red-outline font-black">RESET</button>
         </div>
 
-        <div className="flex-1 max-w-lg bg-slate-900/80 rounded-full p-1.5 flex items-center justify-between border border-slate-800">
-          <div className="flex-1 bg-cyan-600 rounded-full py-2 orbitron text-[10px] font-bold text-center text-white shadow-[0_0_15px_rgba(0,162,255,0.4)]">TEAM BLUE</div>
-          <span className="px-6 orbitron italic text-slate-500 text-xs font-black">VS</span>
-          <div className="flex-1 bg-orange-700 rounded-full py-2 orbitron text-[10px] font-bold text-center text-white shadow-[0_0_15px_rgba(255,115,0,0.4)]">TEAM ORANGE</div>
-        </div>
-
-        <div className="hidden md:block">
-          <button className="px-6 py-2 border border-slate-700 text-slate-500 orbitron text-[10px] rounded bg-slate-900/50 hover:text-white transition-all">
-            VIEW HISTORY
-          </button>
+        <div className="flex-1 max-w-2xl flex items-center bg-[#000] border-2 border-slate-900 p-1.5 rounded-xl ml-8">
+          <div className="flex-1 bg-cyan-700 py-3 rounded-lg text-white orbitron text-xs font-black text-center shadow-[0_0_20px_rgba(0,162,255,0.4)]">TEAM BLUE</div>
+          <span className="px-8 orbitron italic text-white text-xl font-black">VS</span>
+          <div className="flex-1 bg-orange-800 py-3 rounded-lg text-white orbitron text-xs font-black text-center shadow-[0_0_20px_rgba(255,115,0,0.4)]">TEAM ORANGE</div>
         </div>
       </div>
 
-      {/* History Table Container */}
-      <div className="card-glass overflow-hidden mb-12 border-slate-800">
-        <div className="overflow-x-auto">
-          <table className="wicc-table text-xs">
-            <thead>
-              <tr>
-                <th className="text-left">Date</th>
-                <th className="text-left">Match</th>
-                <th className="text-left">Team Blue</th>
-                <th className="text-left">Team Orange</th>
-                <th className="text-center">Overs</th>
-                <th className="text-center">Winner</th>
-                <th className="text-center">Pts</th>
-                <th className="text-center">Awards</th>
+      {/* History Table */}
+      <div className="card-glass overflow-hidden mb-16 bg-black border-slate-800 shadow-2xl">
+        <table className="wicc-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Match</th>
+              <th>Team Blue</th>
+              <th>Team Orange</th>
+              <th>Overs</th>
+              <th>Winner</th>
+              <th>Pts</th>
+              <th>Awards</th>
+            </tr>
+          </thead>
+          <tbody className="mono text-[11px]">
+            {matches.map((m) => (
+              <tr key={m.id}>
+                <td className="text-slate-500">{m.date}</td>
+                <td className="text-cyan-400 font-bold">{m.matchnumber}</td>
+                <td className="text-slate-100">{m.teamonescore}</td>
+                <td className="text-slate-100">{m.teamtwoscore}</td>
+                <td className="text-center text-slate-500">{m.overs || '0.0'}</td>
+                <td className="text-center">
+                  <span className={`px-4 py-1.5 rounded-md text-[9px] font-black orbitron ${parseInt(m.teamonepoints || '0') > parseInt(m.teamtwopoints || '0')
+                      ? 'bg-cyan-900/30 text-cyan-400 border border-cyan-800/50'
+                      : parseInt(m.teamtwopoints || '0') > parseInt(m.teamonepoints || '0')
+                        ? 'bg-orange-900/30 text-orange-400 border border-orange-800/50'
+                        : 'bg-slate-900 text-slate-500'
+                    }`}>
+                    {parseInt(m.teamonepoints || '0') > parseInt(m.teamtwopoints || '0') ? 'BLUE' : parseInt(m.teamtwopoints || '0') > parseInt(m.teamonepoints || '0') ? 'ORANGE' : 'DRAW'}
+                  </span>
+                </td>
+                <td className="text-center text-white font-black">{m.teamonepoints}-{m.teamtwopoints}</td>
+                <td className="text-center text-yellow-500 orbitron text-[10px]">{m.mom}</td>
               </tr>
-            </thead>
-            <tbody className="mono">
-              {matches.map((m) => (
-                <tr key={m.id}>
-                  <td className="text-slate-400">{m.date}</td>
-                  <td className="text-cyan-400 font-bold tracking-widest">{m.matchnumber}</td>
-                  <td className="text-cyan-100">{m.teamonescore} <span className="text-[10px] text-slate-500">runs</span></td>
-                  <td className="text-orange-100">{m.teamtwoscore} <span className="text-[10px] text-slate-500">runs</span></td>
-                  <td className="text-center text-slate-400">{m.overs || '---'}</td>
-                  <td className="text-center">
-                    <span className={`px-3 py-1 rounded text-[9px] font-black orbitron ${parseInt(m.teamonepoints || '0') > parseInt(m.teamtwopoints || '0')
-                        ? 'text-cyan-400'
-                        : parseInt(m.teamtwopoints || '0') > parseInt(m.teamonepoints || '0')
-                          ? 'text-orange-400'
-                          : 'text-slate-500'
-                      }`}>
-                      {parseInt(m.teamonepoints || '0') > parseInt(m.teamtwopoints || '0') ? 'BLUE' : parseInt(m.teamtwopoints || '0') > parseInt(m.teamonepoints || '0') ? 'ORANGE' : 'DRAW'}
-                    </span>
-                  </td>
-                  <td className="text-center text-white font-bold">{m.teamonepoints}-{m.teamtwopoints}</td>
-                  <td className="text-center text-yellow-400 orbitron text-[10px]">{m.mom}</td>
-                </tr>
-              ))}
-              {matches.length === 0 && (
-                <tr>
-                  <td colSpan={8} className="p-12 text-center text-slate-600 orbitron text-[10px] uppercase tracking-[0.3em]">
-                    System Waiting for Match Entry Data
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+            ))}
+            {matches.length === 0 && (
+              <tr>
+                <td colSpan={8} className="p-20 text-center text-slate-700 font-bold orbitron tracking-[0.4em] uppercase opacity-40">System Idle: Pending Data Entry</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
 
       <MatchForm onSave={fetchData} />

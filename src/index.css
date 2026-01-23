@@ -2,7 +2,7 @@
 
 :root {
   --bg-deep: #020617;
-  --bg-card: rgba(15, 23, 42, 0.6);
+  --bg-card: #0f172a;
   --team-blue: #00a2ff;
   --team-orange: #ff7300;
   --accent-cyan: #00e5ff;
@@ -11,8 +11,8 @@
   --text-secondary: #94a3b8;
   --border-glass: rgba(255, 255, 255, 0.05);
 
-  --glow-blue: 0 0 15px rgba(0, 162, 255, 0.4);
-  --glow-orange: 0 0 15px rgba(255, 115, 0, 0.4);
+  --glow-blue: 0 0 25px rgba(0, 162, 255, 0.3);
+  --glow-orange: 0 0 25px rgba(255, 115, 0, 0.3);
 }
 
 * {
@@ -26,12 +26,12 @@ body {
   color: var(--text-primary);
   font-family: 'Inter', sans-serif;
   min-height: 100vh;
-  padding-bottom: 4rem;
+  padding-bottom: 6rem;
 }
 
 .orbitron {
   font-family: 'Orbitron', sans-serif;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
 }
 
 .mono {
@@ -41,142 +41,127 @@ body {
 /* Card Styles */
 .card-glass {
   background: var(--bg-card);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--border-glass);
-  border-radius: 12px;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
 .card-blue {
-  border-bottom: 3px solid var(--team-blue);
-  box-shadow: inset 0 0 20px rgba(0, 162, 255, 0.05);
+  border-bottom: 4px solid var(--team-blue);
 }
 
 .card-orange {
-  border-bottom: 3px solid var(--team-orange);
-  box-shadow: inset 0 0 20px rgba(255, 115, 0, 0.05);
+  border-bottom: 4px solid var(--team-orange);
 }
 
 .card-center {
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.8) 0%, rgba(2, 6, 23, 0.9) 100%);
+  background: #1e293b;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 4px solid var(--accent-cyan);
 }
 
 /* Input Styles */
 input,
 select {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1.5px solid rgba(255, 255, 255, 0.1);
-  color: white;
-  border-radius: 8px;
-  padding: 0.6rem 1rem;
+  background: #000 !important;
+  border: 1px solid rgba(0, 162, 255, 0.5) !important;
+  color: #fff !important;
+  border-radius: 6px !important;
+  padding: 0.5rem 0.8rem;
   transition: all 0.3s ease;
 }
 
 input:focus,
 select:focus {
   outline: none;
-  border-color: var(--team-blue);
-  box-shadow: 0 0 10px rgba(0, 162, 255, 0.2);
+  border-color: var(--accent-cyan) !important;
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+}
+
+.input-orange {
+  border-color: rgba(255, 115, 0, 0.5) !important;
 }
 
 .input-orange:focus {
-  border-color: var(--team-orange);
-  box-shadow: 0 0 10px rgba(255, 115, 0, 0.2);
+  border-color: var(--accent-orange) !important;
+  box-shadow: 0 0 15px rgba(255, 145, 0, 0.3);
 }
 
-/* Header Pulse */
-@keyframes neon-flicker {
-
-  0%,
-  19%,
-  21%,
-  23%,
-  25%,
-  54%,
-  56%,
-  100% {
-    filter: drop-shadow(0 0 2px var(--accent-cyan));
-  }
-
-  20%,
-  22%,
-  24%,
-  55% {
-    filter: none;
-  }
-}
-
+/* Header */
 .logo-main {
-  font-size: 5rem;
-  font-weight: 800;
-  background: linear-gradient(to bottom, #fff 0%, #cbd5e1 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.2));
+  font-size: 6rem;
+  font-weight: 900;
+  color: white;
+  letter-spacing: -0.05em;
+  margin-bottom: 0px;
 }
 
 /* Table Customization */
 .wicc-table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 4px;
+  border-collapse: collapse;
 }
 
 .wicc-table th {
-  background: rgba(30, 41, 59, 0.5);
-  color: var(--accent-cyan);
+  background: #1e293b;
+  color: #00a2ff;
   font-family: 'Orbitron', sans-serif;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
-  padding: 1rem;
-  border-bottom: 1px solid rgba(0, 229, 255, 0.2);
+  padding: 1.2rem;
+  border: 0.5px solid rgba(255, 255, 255, 0.05);
 }
 
 .wicc-table td {
-  padding: 1rem;
-  background: rgba(15, 23, 42, 0.4);
-  border-top: 1px solid rgba(255, 255, 255, 0.02);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
-}
-
-.wicc-table tr:hover td {
-  background: rgba(30, 41, 59, 0.6);
-}
-
-.wicc-table tr td:first-child {
-  border-left: 1px solid rgba(255, 255, 255, 0.02);
-  border-radius: 8px 0 0 8px;
-}
-
-.wicc-table tr td:last-child {
-  border-right: 1px solid rgba(255, 255, 255, 0.02);
-  border-radius: 0 8px 8px 0;
+  padding: 1.2rem;
+  background: #000;
+  border: 0.5px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Buttons */
-.btn-primary {
-  background: linear-gradient(90deg, #0088ff 0%, #0055ff 100%);
-  color: white;
-  font-weight: 600;
+.btn-outline {
+  border: 1.5px solid;
+  background: transparent;
+  padding: 0.5rem 1rem;
+  font-size: 0.65rem;
+  border-radius: 6px;
+  font-family: 'Orbitron', sans-serif;
+  transition: all 0.2s;
+}
+
+.btn-blue-outline {
+  border-color: #003366;
+  color: #00a2ff;
+}
+
+.btn-red-outline {
+  border-color: #660000;
+  color: #ff3333;
+}
+
+.btn-commit {
+  background: white;
+  color: black;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
   border-radius: 8px;
-  box-shadow: var(--glow-blue);
-  transition: all 0.3s;
+  font-size: 0.75rem;
+  text-transform: uppercase;
 }
 
-.btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 0 20px rgba(0, 162, 255, 0.6);
-}
-
-.btn-orange {
-  background: linear-gradient(90deg, #ff7300 0%, #ff4c00 100%);
-  box-shadow: var(--glow-orange);
+/* Roster Tags */
+.roster-tag {
+  background: #000;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.3rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  color: #cbd5e1;
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 
 ::-webkit-scrollbar-track {
@@ -184,8 +169,8 @@ select:focus {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 4px;
+  background: #334155;
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
