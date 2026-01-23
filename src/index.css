@@ -1,0 +1,84 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&family=JetBrains+Mono&display=swap');
+
+:root {
+  --bg-deep: #020617;
+  --team-a-cyan: #00a2ff;
+  --team-b-orange: #ff7300;
+  --accent-gold: #fbbf24;
+  --accent-red: #ef4444;
+  --glass-bg: rgba(2, 6, 23, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --neon-glow-a: 0 0 10px rgba(0, 162, 255, 0.5), 0 0 20px rgba(0, 162, 255, 0.3);
+  --neon-glow-b: 0 0 10px rgba(255, 115, 0, 0.5), 0 0 20px rgba(255, 115, 0, 0.3);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-deep);
+  color: #f8fafc;
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, .orbitron {
+  font-family: 'Orbitron', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+}
+
+.glow-a {
+  box-shadow: var(--neon-glow-a);
+  border-color: var(--team-a-cyan);
+}
+
+.glow-b {
+  box-shadow: var(--neon-glow-b);
+  border-color: var(--team-b-orange);
+}
+
+@keyframes pulse {
+  0% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 5px var(--team-a-cyan)); }
+  50% { opacity: 0.8; transform: scale(1.05); filter: drop-shadow(0 0 20px var(--team-a-cyan)); }
+  100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 5px var(--team-a-cyan)); }
+}
+
+.header-pulse {
+  animation: pulse 3s infinite ease-in-out;
+}
+
+/* Custom scrollbar for glassmorphism look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-deep);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--team-a-cyan);
+}
