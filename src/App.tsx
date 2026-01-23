@@ -5,7 +5,8 @@ import { AwardsHub } from './AwardsHub';
 import { ExportTool } from './ExportTool';
 import { MembersHub } from './MembersHub';
 import type { MatchData } from './types';
-import { Trash2, Edit2, Archive, Download, RotateCcw } from 'lucide-react';
+import { Trash2, Edit2, Download, RotateCcw } from 'lucide-react';
+import wiccLogo from './assets/wicc_logo.png';
 
 const App: React.FC = () => {
   const [matches, setMatches] = useState<MatchData[]>([]);
@@ -86,7 +87,7 @@ const App: React.FC = () => {
       {/* Header Section */}
       <header className="header">
         <button className="btn-outline btn-blue-outline" style={{ position: 'absolute', top: 0, right: 0, fontSize: '10px' }}>VIEW HISTORY</button>
-        <h1 className="title-logo orbitron">WICC</h1>
+        <img src={wiccLogo} alt="WICC Logo" className="title-logo-img" />
         <div className="subtitle-container">
           <div className="line line-blue"></div>
           <span className="orbitron" style={{ fontSize: '12px', color: '#00e5ff', fontWeight: 'bold', letterSpacing: '0.8em' }}>PREMIER RECORDER</span>
@@ -102,7 +103,7 @@ const App: React.FC = () => {
         </div>
         <div className="card card-center">
           <span className="card-label orbitron">SERIES STATUS</span>
-          <span className="card-status orbitron text-white" style={{ fontSize: '2.5rem' }}>{champion || inLead}</span>
+          <span className="card-status orbitron text-white">{champion || inLead}</span>
           <div className="card-label orbitron" style={{ marginTop: '1rem' }}>TARGET: 10 PTS</div>
         </div>
         <div className="card card-orange">
@@ -114,10 +115,10 @@ const App: React.FC = () => {
       {/* Action Bar */}
       <div className="flex-between" style={{ marginBottom: '3rem' }}>
         <div style={{ display: 'flex', gap: '1.5rem' }}>
-          <button onClick={exportToExcel} className="btn-outline btn-blue-outline flex items-center gap-2">
+          <button onClick={exportToExcel} className="btn-outline btn-blue-outline">
             <Download size={14} /> EXCEL
           </button>
-          <button onClick={handleArchive} className="btn-outline btn-red-outline flex items-center gap-2">
+          <button onClick={handleArchive} className="btn-outline btn-red-outline">
             <RotateCcw size={14} /> RESET & ARCHIVE
           </button>
         </div>
@@ -127,14 +128,16 @@ const App: React.FC = () => {
             className="team-tab tab-blue orbitron"
             value={teamOneName}
             onChange={e => setTeamOneName(e.target.value.toUpperCase())}
-            style={{ border: 'none', color: 'white' }}
+            placeholder="TEAM BLUE NAME"
+            spellCheck={false}
           />
           <span className="vs-text orbitron">VS</span>
           <input
             className="team-tab tab-orange orbitron"
             value={teamTwoName}
             onChange={e => setTeamTwoName(e.target.value.toUpperCase())}
-            style={{ border: 'none', color: 'white' }}
+            placeholder="TEAM ORANGE NAME"
+            spellCheck={false}
           />
         </div>
       </div>
@@ -145,21 +148,24 @@ const App: React.FC = () => {
           <thead>
             <tr className="orbitron">
               <th>DATE</th>
-              <th>MATCH</th>
+              <th>MATCH #</th>
               <th>{teamOneName}</th>
               <th>{teamTwoName}</th>
               <th style={{ textAlign: 'center' }}>OVERS</th>
               <th style={{ textAlign: 'center' }}>WINNER</th>
               <th style={{ textAlign: 'center' }}>PTS</th>
-              <th style={{ textAlign: 'center' }}>AWARDS</th>
+              <th style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '7px', opacity: 0.7 }}>MOM CAPTION</div>
+                AWARD
+              </th>
               <th style={{ textAlign: 'center' }}>ACTIONS</th>
             </tr>
           </thead>
           <tbody className="mono">
             {matches.map((m) => (
-              <tr key={m.id} hover-effect="true">
+              <tr key={m.id} className="table-row-hover">
                 <td style={{ color: '#94a3b8' }}>{m.date}</td>
-                <td style={{ color: '#00e5ff', fontWeight: 'bold' }}>{m.matchnumber}</td>
+                <td style={{ color: '#00e5ff', fontWeight: 'bold', textAlign: 'center' }}>{m.matchnumber}</td>
                 <td>{m.teamonescore} {m.innings === '2-Innings' && <span style={{ opacity: 0.5, fontSize: '0.7rem' }}>({m.teamoneinn1}+{m.teamoneinn2})</span>}</td>
                 <td>{m.teamtwoscore} {m.innings === '2-Innings' && <span style={{ opacity: 0.5, fontSize: '0.7rem' }}>({m.teamtwoinn1}+{m.teamtwoinn2})</span>}</td>
                 <td style={{ textAlign: 'center', color: '#94a3b8' }}>{m.overs || '0.0'}</td>
@@ -169,9 +175,13 @@ const App: React.FC = () => {
                   </span>
                 </td>
                 <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{m.teamonepoints}-{m.teamtwopoints}</td>
-                <td style={{ textAlign: 'center', color: '#ffcc00' }} className="orbitron">{m.mom}</td>
+                <td style={{ textAlign: 'center' }}>
+                  <div className="orbitron" style={{ color: '#ffcc00', fontSize: '10px' }}>{m.mom}</div>
+                  {m.moi1 && <div style={{ fontSize: '8px', opacity: 0.5 }}>{m.moi1}</div>}
+                </td>
                 <td style={{ textAlign: 'center' }}>
                   <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                    <Edit2 size={14} className="text-cyan-500 cursor-pointer hover:scale-110 transition opacity-50" />
                     <Trash2 size={16} className="text-red-500 cursor-pointer hover:scale-110 transition" onClick={() => handleDelete(m.id!)} />
                   </div>
                 </td>
@@ -184,7 +194,7 @@ const App: React.FC = () => {
         </table>
       </div>
 
-      <MatchForm onSave={fetchData} teamOneName={teamOneName} teamTwoName={teamTwoName} />
+      <MatchForm onSave={fetchData} teamOneName={teamOneName} teamTwoName={teamTwoName} matchesCount={matches.length} />
       <MembersHub onUpdate={fetchData} />
       {seriesInfo && <AwardsHub onUpdate={fetchData} seriesData={seriesInfo} />}
       {seriesInfo && <ExportTool series={{ ...seriesInfo, ptsA: totals.ptsA, ptsB: totals.ptsB, champion }} />}

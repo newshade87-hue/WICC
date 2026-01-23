@@ -7,14 +7,15 @@ interface MatchFormProps {
     onSave: () => void;
     teamOneName: string;
     teamTwoName: string;
+    matchesCount: number;
 }
 
-export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamTwoName }) => {
+export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamTwoName, matchesCount }) => {
     const [format, setFormat] = useState<MatchFormat>('1-Inning');
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState<Partial<MatchData>>({
         date: new Date().toISOString().split('T')[0],
-        matchnumber: '',
+        matchnumber: (matchesCount + 1).toString(),
         teamonename: teamOneName,
         teamtwoname: teamTwoName,
         teamoneinn1: '0',
@@ -48,7 +49,7 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
         const payload = {
             ...formData,
             innings: format,
-            teamonename: teamOneName, // Use the current team names from App state
+            teamonename: teamOneName,
             teamtwoname: teamTwoName,
             teamonescore: totals.t1.toString(),
             teamtwoscore: totals.t2.toString(),
@@ -61,7 +62,7 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
             onSave();
             setFormData(prev => ({
                 ...prev,
-                matchnumber: prev.matchnumber ? (parseInt(prev.matchnumber) + 1).toString() : '',
+                matchnumber: (parseInt(prev.matchnumber || '0') + 1).toString(),
                 teamoneinn1: '0',
                 teamoneinn2: '0',
                 teamtwoinn1: '0',
@@ -78,10 +79,14 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
         <div className="form-card">
             <form onSubmit={handleSubmit}>
                 {/* Row 1 */}
-                <div className="form-row" style={{ gridTemplateColumns: format === '2-Innings' ? 'repeat(9, 1fr)' : 'repeat(7, 1fr)' }}>
+                <div className="form-row" style={{ gridTemplateColumns: format === '2-Innings' ? 'repeat(9, 1fr)' : 'repeat(8, 1fr)' }}>
                     <div className="form-group">
                         <label className="form-label orbitron">MATCH DATE</label>
                         <input type="date" value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} />
+                    </div>
+                    <div className="form-group">
+                        <label className="form-label orbitron">MATCH #</label>
+                        <input type="number" value={formData.matchnumber} onChange={e => setFormData({ ...formData, matchnumber: e.target.value })} placeholder="e.g. 1" />
                     </div>
                     <div className="form-group">
                         <label className="form-label orbitron">FORMAT</label>
@@ -117,11 +122,11 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
 
                     <div className="form-group">
                         <label className="form-label orbitron">OVERS</label>
-                        <input type="text" style={{ textAlign: 'center' }} value={formData.overs} onChange={e => setFormData({ ...formData, overs: e.target.value })} />
+                        <input type="text" style={{ textAlign: 'center' }} value={formData.overs} onChange={e => setFormData({ ...formData, overs: e.target.value })} placeholder="e.g. 20.0" />
                     </div>
                     <div className="form-group">
                         <label className="form-label orbitron">WON BY</label>
-                        <div style={{ background: '#000', padding: '0.6rem', border: '1px solid #333', borderRadius: '6px', textAlign: 'center', fontSize: '0.75rem', fontWeight: 'bold' }}>{totals.winmargin}</div>
+                        <div style={{ background: 'var(--input-bg)', padding: '0.7rem', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', textAlign: 'center', fontSize: '0.75rem', fontWeight: 'bold' }}>{totals.winmargin}</div>
                     </div>
                     <div className="form-group">
                         <button type="submit" className="btn-commit orbitron" disabled={loading}>COMMIT</button>
@@ -138,26 +143,32 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
                     </div>
                     <div className="form-group">
                         <label className="form-label orbitron">MOM ENTRY</label>
-                        <select style={{ fontSize: '0.75rem' }} value={formData.mom} onChange={e => setFormData({ ...formData, mom: e.target.value })}>
+                        <select value={formData.mom} onChange={e => setFormData({ ...formData, mom: e.target.value })}>
                             <option value="">SELECT PLAYER</option>
                             {WICC_MEMBERS.map(m => <option key={m} value={m}>{m}</option>)}
                         </select>
                     </div>
                     <div className="form-group">
                         <label className="form-label orbitron">MOI ENTRY 1</label>
-                        <input type="text" placeholder="MOI 1" value={formData.moi1} onChange={e => setFormData({ ...formData, moi1: e.target.value })} />
+                        <select value={formData.moi1} onChange={e => setFormData({ ...formData, moi1: e.target.value })}>
+                            <option value="">SELECT PLAYER</option>
+                            {WICC_MEMBERS.map(m => <option key={m} value={m}>{m}</option>)}
+                        </select>
                     </div>
                     <div className="form-group">
                         <label className="form-label orbitron">MOI ENTRY 2</label>
-                        <input type="text" placeholder="MOI 2" value={formData.moi2} onChange={e => setFormData({ ...formData, moi2: e.target.value })} />
+                        <select value={formData.moi2} onChange={e => setFormData({ ...formData, moi2: e.target.value })}>
+                            <option value="">SELECT PLAYER</option>
+                            {WICC_MEMBERS.map(m => <option key={m} value={m}>{m}</option>)}
+                        </select>
                     </div>
                     <div className="form-group" style={{ gridColumn: 'span 1' }}>
                         <label className="form-label orbitron" style={{ color: '#00a2ff' }}>{teamOneName} PTS</label>
-                        <div style={{ background: '#000', border: '1px solid var(--team-blue)', padding: '0.6rem', borderRadius: '6px', textAlign: 'center', fontSize: '1.5rem', fontWeight: '900', color: '#00a2ff', boxShadow: '0 0 15px rgba(0, 162, 255, 0.3)' }}>{totals.pts1}</div>
+                        <div style={{ background: 'var(--input-bg)', border: '1px solid var(--team-blue)', padding: '0.6rem', borderRadius: '8px', textAlign: 'center', fontSize: '1.5rem', fontWeight: '900', color: '#00a2ff', boxShadow: '0 0 15px rgba(0, 162, 255, 0.2)' }}>{totals.pts1}</div>
                     </div>
                     <div className="form-group" style={{ gridColumn: 'span 1' }}>
                         <label className="form-label orbitron" style={{ color: '#ff7300' }}>{teamTwoName} PTS</label>
-                        <div style={{ background: '#000', border: '1px solid var(--team-orange)', padding: '0.6rem', borderRadius: '6px', textAlign: 'center', fontSize: '1.5rem', fontWeight: '900', color: '#ff7300', boxShadow: '0 0 15px rgba(255, 115, 0, 0.3)' }}>{totals.pts2}</div>
+                        <div style={{ background: 'var(--input-bg)', border: '1px solid var(--team-orange)', padding: '0.6rem', borderRadius: '8px', textAlign: 'center', fontSize: '1.5rem', fontWeight: '900', color: '#ff7300', boxShadow: '0 0 15px rgba(255, 115, 0, 0.2)' }}>{totals.pts2}</div>
                     </div>
                 </div>
             </form>
