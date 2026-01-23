@@ -5,20 +5,23 @@ import { AwardsHub } from './AwardsHub';
 import { ExportTool } from './ExportTool';
 import { MembersHub } from './MembersHub';
 import type { MatchData } from './types';
-import { Trash2, Edit2, Download, RotateCcw } from 'lucide-react';
+import { Trash2, Edit2, Download, RotateCcw, Camera } from 'lucide-react';
 import wiccLogo from './assets/wicc_logo.png';
+import html2canvas from 'html2canvas';
 
 const App: React.FC = () => {
   const [matches, setMatches] = useState<MatchData[]>([]);
   const [seriesInfo, setSeriesInfo] = useState<any>(null);
   const [teamOneName, setTeamOneName] = useState('TEAM BLUE');
   const [teamTwoName, setTeamTwoName] = useState('TEAM ORANGE');
+  const [editingMatch, setEditingMatch] = useState<MatchData | null>(null);
 
   const fetchData = async () => {
     const { data: mData } = await supabase
       .from('wicc_matches')
       .select('*')
       .eq('is_archived', false)
+      .order('date', { ascending: false })
       .order('created_at', { ascending: false });
 
     const { data: sData } = await supabase
@@ -58,6 +61,22 @@ const App: React.FC = () => {
     }
   };
 
+  const takeScreenshot = async () => {
+    const element = document.body;
+    const canvas = await html2canvas(element, {
+      backgroundColor: '#020617',
+      useCORS: true,
+      scale: 2,
+      windowWidth: element.scrollWidth,
+      windowHeight: element.scrollHeight,
+    });
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = `wicc_dashboard_snapshot_${new Date().getTime()}.jpg`;
+    link.click();
+  };
+
   const exportToExcel = () => {
     const headers = ['Date', 'Match', 'Team 1', 'Score 1', 'Team 2', 'Score 2', 'Winner', 'Points', 'MOM'];
     const csvContent = [
@@ -86,7 +105,9 @@ const App: React.FC = () => {
     <div className="container" style={{ paddingBottom: '10rem' }}>
       {/* Header Section */}
       <header className="header">
-        <button className="btn-outline btn-blue-outline" style={{ position: 'absolute', top: 0, right: 0, fontSize: '10px' }}>VIEW HISTORY</button>
+        <button onClick={takeScreenshot} className="btn-outline btn-blue-outline" style={{ position: 'absolute', top: 0, right: 0, fontSize: '10px' }}>
+          <Camera size={14} /> FULL SNAPSHOT
+        </button>
         <div className="logo-container">
           <img src={wiccLogo} alt="WICC Logo" className="title-logo-img" />
         </div>
@@ -157,8 +178,8 @@ const App: React.FC = () => {
               <th style={{ textAlign: 'center' }}>WINNER</th>
               <th style={{ textAlign: 'center' }}>PTS</th>
               <th style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '7px', opacity: 0.7 }}>MOM CAPTION</div>
-                AWARD
+                <div style={{ fontSize: '7px', opacity: 0.7 }}>AWARDS HUB</div>
+                PLAYERS
               </th>
               <th style={{ textAlign: 'center' }}>ACTIONS</th>
             </tr>
@@ -178,12 +199,15 @@ const App: React.FC = () => {
                 </td>
                 <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{m.teamonepoints}-{m.teamtwopoints}</td>
                 <td style={{ textAlign: 'center' }}>
-                  <div className="orbitron" style={{ color: '#ffcc00', fontSize: '10px' }}>{m.mom}</div>
-                  {m.moi1 && <div style={{ fontSize: '8px', opacity: 0.5 }}>{m.moi1}</div>}
+                  <div className="orbitron" style={{ color: '#ffcc00', fontSize: '10px', fontWeight: 'bold' }}>MOM: {m.mom}</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', justifyContent: 'center', marginTop: '0.2rem' }}>
+                    {m.moi1 && <span style={{ fontSize: '7px', background: 'rgba(0,162,255,0.1)', color: '#00e5ff', padding: '2px 4px', borderRadius: '4px' }}>MOI 1: {m.moi1}</span>}
+                    {m.moi2 && <span style={{ fontSize: '7px', background: 'rgba(255,115,0,0.1)', color: '#ff9100', padding: '2px 4px', borderRadius: '4px' }}>MOI 2: {m.moi2}</span>}
+                  </div>
                 </td>
                 <td style={{ textAlign: 'center' }}>
                   <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                    <Edit2 size={14} className="text-cyan-500 cursor-pointer hover:scale-110 transition opacity-50" />
+                    <Edit2 size={14} className="text-cyan-500 cursor-pointer hover:scale-110 transition" onClick={() => { setEditingMatch(m); window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }} />
                     <Trash2 size={16} className="text-red-500 cursor-pointer hover:scale-110 transition" onClick={() => handleDelete(m.id!)} />
                   </div>
                 </td>
@@ -196,7 +220,14 @@ const App: React.FC = () => {
         </table>
       </div>
 
-      <MatchForm onSave={fetchData} teamOneName={teamOneName} teamTwoName={teamTwoName} matchesCount={matches.length} />
+      <MatchForm
+        onSave={() => { fetchData(); setEditingMatch(null); }}
+        teamOneName={teamOneName}
+        teamTwoName={teamTwoName}
+        matchesCount={matches.length}
+        editingMatch={editingMatch}
+        onCancel={() => setEditingMatch(null)}
+      />
       <MembersHub onUpdate={fetchData} />
       {seriesInfo && <AwardsHub onUpdate={fetchData} seriesData={seriesInfo} />}
       {seriesInfo && <ExportTool series={{ ...seriesInfo, ptsA: totals.ptsA, ptsB: totals.ptsB, champion }} />}

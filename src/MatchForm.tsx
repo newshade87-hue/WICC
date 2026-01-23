@@ -1,16 +1,19 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 import { WICC_MEMBERS, calculatePoints } from './types';
 import type { MatchData, MatchFormat } from './types';
+import { X } from 'lucide-react';
 
 interface MatchFormProps {
     onSave: () => void;
     teamOneName: string;
     teamTwoName: string;
     matchesCount: number;
+    editingMatch: MatchData | null;
+    onCancel: () => void;
 }
 
-export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamTwoName, matchesCount }) => {
+export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamTwoName, matchesCount, editingMatch, onCancel }) => {
     const [format, setFormat] = useState<MatchFormat>('1-Inning');
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState<Partial<MatchData>>({
@@ -29,6 +32,31 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
         moi1: '',
         moi2: '',
     });
+
+    useEffect(() => {
+        if (editingMatch) {
+            setFormData(editingMatch);
+            setFormat(editingMatch.innings);
+        } else {
+            setFormData({
+                date: new Date().toISOString().split('T')[0],
+                matchnumber: (matchesCount + 1).toString(),
+                teamonename: teamOneName,
+                teamtwoname: teamTwoName,
+                teamoneinn1: '0',
+                teamoneinn2: '0',
+                teamtwoinn1: '0',
+                teamtwoinn2: '0',
+                overs: '',
+                resulttype: '',
+                mom: '',
+                mos: '',
+                moi1: '',
+                moi2: '',
+            });
+            setFormat('1-Inning');
+        }
+    }, [editingMatch, matchesCount, teamOneName, teamTwoName]);
 
     const totals = useMemo(() => {
         const t1 = parseInt(formData.teamoneinn1 || '0') + (format === '2-Innings' ? parseInt(formData.teamoneinn2 || '0') : 0);
@@ -57,26 +85,30 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
             teamtwopoints: totals.pts2.toString(),
             winmargin: totals.winmargin,
         };
-        const { error } = await supabase.from('wicc_matches').insert([payload]);
-        if (!error) {
-            onSave();
-            setFormData(prev => ({
-                ...prev,
-                matchnumber: (parseInt(prev.matchnumber || '0') + 1).toString(),
-                teamoneinn1: '0',
-                teamoneinn2: '0',
-                teamtwoinn1: '0',
-                teamtwoinn2: '0',
-                moi1: '',
-                moi2: '',
-                mom: ''
-            }));
+
+        if (editingMatch?.id) {
+            const { error } = await supabase.from('wicc_matches').update(payload).eq('id', editingMatch.id);
+            if (!error) onSave();
+        } else {
+            const { error } = await supabase.from('wicc_matches').insert([payload]);
+            if (!error) onSave();
         }
         setLoading(false);
     };
 
     return (
-        <div className="form-card">
+        <div className={`form-card ${editingMatch ? 'editing-active' : ''}`} style={{ transition: 'all 0.5s', border: editingMatch ? '2px solid var(--accent-cyan)' : '1px solid rgba(255,255,255,0.05)' }}>
+            <div className="flex-between" style={{ marginBottom: '1.5rem' }}>
+                <h3 className="orbitron" style={{ fontSize: '1rem', color: editingMatch ? 'var(--accent-cyan)' : 'white' }}>
+                    {editingMatch ? 'EDIT MATCH RECORD' : 'RECORD NEW MATCH'}
+                </h3>
+                {editingMatch && (
+                    <button onClick={onCancel} className="btn-outline btn-red-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '8px' }}>
+                        <X size={12} /> CANCEL
+                    </button>
+                )}
+            </div>
+
             <form onSubmit={handleSubmit}>
                 {/* Row 1 */}
                 <div className="form-row" style={{ gridTemplateColumns: format === '2-Innings' ? 'repeat(9, 1fr)' : 'repeat(8, 1fr)' }}>
@@ -86,7 +118,7 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
                     </div>
                     <div className="form-group">
                         <label className="form-label orbitron">MATCH #</label>
-                        <input type="number" value={formData.matchnumber} onChange={e => setFormData({ ...formData, matchnumber: e.target.value })} placeholder="e.g. 1" />
+                        <input type="number" value={formData.matchnumber} onChange={e => setFormData({ ...formData, matchnumber: e.target.value })} />
                     </div>
                     <div className="form-group">
                         <label className="form-label orbitron">FORMAT</label>
@@ -122,14 +154,16 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
 
                     <div className="form-group">
                         <label className="form-label orbitron">OVERS</label>
-                        <input type="text" style={{ textAlign: 'center' }} value={formData.overs} onChange={e => setFormData({ ...formData, overs: e.target.value })} placeholder="e.g. 20.0" />
+                        <input type="text" style={{ textAlign: 'center' }} value={formData.overs} onChange={e => setFormData({ ...formData, overs: e.target.value })} />
                     </div>
                     <div className="form-group">
                         <label className="form-label orbitron">WON BY</label>
                         <div style={{ background: 'var(--input-bg)', padding: '0.7rem', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', textAlign: 'center', fontSize: '0.75rem', fontWeight: 'bold' }}>{totals.winmargin}</div>
                     </div>
                     <div className="form-group">
-                        <button type="submit" className="btn-commit orbitron" disabled={loading}>COMMIT</button>
+                        <button type="submit" className={`btn-commit orbitron ${editingMatch ? 'btn-update' : ''}`} disabled={loading} style={{ background: editingMatch ? 'var(--accent-cyan)' : 'white' }}>
+                            {editingMatch ? 'UPDATE' : 'COMMIT'}
+                        </button>
                     </div>
                 </div>
 
@@ -164,11 +198,11 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
                     </div>
                     <div className="form-group" style={{ gridColumn: 'span 1' }}>
                         <label className="form-label orbitron" style={{ color: '#00a2ff' }}>{teamOneName} PTS</label>
-                        <div style={{ background: 'var(--input-bg)', border: '1px solid var(--team-blue)', padding: '0.6rem', borderRadius: '8px', textAlign: 'center', fontSize: '1.5rem', fontWeight: '900', color: '#00a2ff', boxShadow: '0 0 15px rgba(0, 162, 255, 0.2)' }}>{totals.pts1}</div>
+                        <div style={{ background: 'var(--input-bg)', border: '1px solid var(--team-blue)', padding: '0.6rem', borderRadius: '8px', textAlign: 'center', fontSize: '1.5rem', fontWeight: '900', color: '#00a2ff' }}>{totals.pts1}</div>
                     </div>
                     <div className="form-group" style={{ gridColumn: 'span 1' }}>
                         <label className="form-label orbitron" style={{ color: '#ff7300' }}>{teamTwoName} PTS</label>
-                        <div style={{ background: 'var(--input-bg)', border: '1px solid var(--team-orange)', padding: '0.6rem', borderRadius: '8px', textAlign: 'center', fontSize: '1.5rem', fontWeight: '900', color: '#ff7300', boxShadow: '0 0 15px rgba(255, 115, 0, 0.2)' }}>{totals.pts2}</div>
+                        <div style={{ background: 'var(--input-bg)', border: '1px solid var(--team-orange)', padding: '0.6rem', borderRadius: '8px', textAlign: 'center', fontSize: '1.5rem', fontWeight: '900', color: '#ff7300' }}>{totals.pts2}</div>
                     </div>
                 </div>
             </form>
