@@ -5,9 +5,10 @@ import { AwardsHub } from './AwardsHub';
 import { ExportTool } from './ExportTool';
 import { MembersHub } from './MembersHub';
 import type { MatchData } from './types';
-import { Trash2, Edit2, Download, RotateCcw, Camera } from 'lucide-react';
+import { Trash2, Edit2, Download, RotateCcw, Camera, History } from 'lucide-react';
 import wiccLogo from './assets/wicc_logo.png';
 import html2canvas from 'html2canvas';
+import { HistoryView } from './HistoryView';
 
 const App: React.FC = () => {
   const [matches, setMatches] = useState<MatchData[]>([]);
@@ -15,6 +16,7 @@ const App: React.FC = () => {
   const [teamOneName, setTeamOneName] = useState('TEAM BLUE');
   const [teamTwoName, setTeamTwoName] = useState('TEAM ORANGE');
   const [editingMatch, setEditingMatch] = useState<MatchData | null>(null);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   const fetchData = async () => {
     const { data: mData } = await supabase
@@ -56,8 +58,34 @@ const App: React.FC = () => {
 
   const handleArchive = async () => {
     if (window.confirm('This will archive all current matches and reset the series. Continue?')) {
-      const { error } = await supabase.from('wicc_matches').update({ is_archived: true }).eq('is_archived', false);
-      if (!error) fetchData();
+      // 1. Prepare Summary
+      const startDate = matches.length > 0 ? matches[matches.length - 1].date : new Date().toISOString().split('T')[0];
+      const endDate = matches.length > 0 ? matches[0].date : new Date().toISOString().split('T')[0];
+
+      const historyEntry = {
+        winner: champion || inLead,
+        points_a: totals.ptsA,
+        points_b: totals.ptsB,
+        start_date: startDate,
+        end_date: endDate,
+        awards: seriesInfo?.awards || {}
+      };
+
+      // 2. Save to History
+      const { error: histError } = await supabase.from('wicc_series_history').insert(historyEntry);
+
+      if (histError) {
+        alert("Error saving history: " + histError.message);
+        return;
+      }
+
+      // 3. Mark matches as archived
+      const { error: matchError } = await supabase.from('wicc_matches').update({ is_archived: true }).eq('is_archived', false);
+
+      // 4. Reset awards in current series
+      const { error: seriesError } = await supabase.from('wicc_series').update({ awards: { mos: '', mvp: '', wickets: '', runs: '', catches: '' } }).eq('id', seriesInfo.id);
+
+      if (!matchError && !seriesError) fetchData();
     }
   };
 
@@ -79,7 +107,28 @@ const App: React.FC = () => {
       },
       ignoreElements: (el) => el.classList.contains('btn-snapshot-hide') || el.tagName === 'BUTTON'
     });
+
     const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+
+    // Attempt Web Share API for Mobile
+    if (navigator.share) {
+      try {
+        const blob = await (await fetch(dataUrl)).blob();
+        const file = new File([blob], `wicc_snapshot.jpg`, { type: 'image/jpeg' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: 'WICC Series Snapshot',
+            text: 'Check out the latest WICC Series status!'
+          });
+          return;
+        }
+      } catch (err) {
+        console.error('Share failed:', err);
+      }
+    }
+
+    // Fallback to Download
     const link = document.createElement('a');
     link.href = dataUrl;
     link.download = `wicc_dashboard_snapshot_${new Date().getTime()}.jpg`;
@@ -114,9 +163,6 @@ const App: React.FC = () => {
     <div className="container" style={{ paddingBottom: '10rem' }}>
       {/* Header Section */}
       <header className="header">
-        <button onClick={takeScreenshot} className="btn-outline btn-blue-outline btn-snapshot-hide" style={{ position: 'absolute', top: 0, right: 0, fontSize: '10px' }}>
-          <Camera size={14} /> FULL SNAPSHOT
-        </button>
         <div className="logo-container">
           <img src={wiccLogo} alt="WICC Logo" className="title-logo-img" />
         </div>
@@ -144,34 +190,24 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {/* Action Bar */}
-      <div className="flex-between" style={{ marginBottom: '3rem' }}>
-        <div style={{ display: 'flex', gap: '1.5rem' }}>
-          <button onClick={exportToExcel} className="btn-outline btn-blue-outline">
-            <Download size={14} /> EXCEL
-          </button>
-          <button onClick={handleArchive} className="btn-outline btn-red-outline">
-            <RotateCcw size={14} /> RESET & ARCHIVE
-          </button>
-        </div>
+      {/* Action Bar Removed from here, moved to bottom */}
 
-        <div className="versus-bar">
-          <input
-            className="team-tab tab-blue orbitron"
-            value={teamOneName}
-            onChange={e => setTeamOneName(e.target.value.toUpperCase())}
-            placeholder="TEAM BLUE NAME"
-            spellCheck={false}
-          />
-          <span className="vs-text orbitron">VS</span>
-          <input
-            className="team-tab tab-orange orbitron"
-            value={teamTwoName}
-            onChange={e => setTeamTwoName(e.target.value.toUpperCase())}
-            placeholder="TEAM ORANGE NAME"
-            spellCheck={false}
-          />
-        </div>
+      <div className="versus-bar">
+        <input
+          className="team-tab tab-blue orbitron"
+          value={teamOneName}
+          onChange={e => setTeamOneName(e.target.value.toUpperCase())}
+          placeholder="TEAM BLUE NAME"
+          spellCheck={false}
+        />
+        <span className="vs-text orbitron">VS</span>
+        <input
+          className="team-tab tab-orange orbitron"
+          value={teamTwoName}
+          onChange={e => setTeamTwoName(e.target.value.toUpperCase())}
+          placeholder="TEAM ORANGE NAME"
+          spellCheck={false}
+        />
       </div>
 
       {/* History Table */}
@@ -264,7 +300,25 @@ const App: React.FC = () => {
       <MembersHub onUpdate={fetchData} />
       {seriesInfo && <AwardsHub onUpdate={fetchData} seriesData={seriesInfo} />}
       {seriesInfo && <ExportTool series={{ ...seriesInfo, ptsA: totals.ptsA, ptsB: totals.ptsB, champion }} />}
-    </div>
+
+      {/* Bottom Action Bar */}
+      <div className="bottom-bar btn-snapshot-hide">
+        <button onClick={takeScreenshot} className="btn-outline btn-blue-outline">
+          <Camera size={14} /> SNAPSHOT
+        </button>
+        <button onClick={exportToExcel} className="btn-outline btn-blue-outline">
+          <Download size={14} /> EXCEL
+        </button>
+        <button onClick={() => setIsHistoryOpen(true)} className="btn-outline btn-blue-outline">
+          <History size={14} /> HISTORY
+        </button>
+        <button onClick={handleArchive} className="btn-outline btn-red-outline">
+          <RotateCcw size={14} /> RESET
+        </button>
+      </div>
+
+      <HistoryView isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} />
+    </div >
   );
 };
 
