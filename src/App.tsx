@@ -5,7 +5,6 @@ import { AwardsHub } from './AwardsHub';
 import { ExportTool } from './ExportTool';
 import { MembersHub } from './MembersHub';
 import type { MatchData } from './types';
-import { FileSpreadsheet, RotateCcw } from 'lucide-react';
 
 const App: React.FC = () => {
   const [matches, setMatches] = useState<MatchData[]>([]);
