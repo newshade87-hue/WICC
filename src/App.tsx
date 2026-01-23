@@ -87,7 +87,9 @@ const App: React.FC = () => {
       {/* Header Section */}
       <header className="header">
         <button className="btn-outline btn-blue-outline" style={{ position: 'absolute', top: 0, right: 0, fontSize: '10px' }}>VIEW HISTORY</button>
-        <img src={wiccLogo} alt="WICC Logo" className="title-logo-img" />
+        <div className="logo-container">
+          <img src={wiccLogo} alt="WICC Logo" className="title-logo-img" />
+        </div>
         <div className="subtitle-container">
           <div className="line line-blue"></div>
           <span className="orbitron" style={{ fontSize: '12px', color: '#00e5ff', fontWeight: 'bold', letterSpacing: '0.8em' }}>PREMIER RECORDER</span>

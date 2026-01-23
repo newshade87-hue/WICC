@@ -67,10 +67,73 @@ body {
 }
 
 .title-logo-img {
-  max-width: 300px;
+  max-width: 260px;
   height: auto;
-  filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.2));
-  margin-bottom: 1rem;
+  z-index: 10;
+  position: relative;
+  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.4));
+  animation: logo-glow 3s ease-in-out infinite alternate;
+}
+
+.logo-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 20px;
+}
+
+/* Spinning RGB Border Effect */
+.logo-container::before {
+  content: '';
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg,
+      #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+  animation: logo-spin 4s linear infinite;
+  filter: blur(40px);
+  opacity: 0.4;
+  z-index: 0;
+}
+
+/* Inner Glow */
+.logo-container::after {
+  content: '';
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(10px);
+  z-index: 1;
+  box-shadow: inset 0 0 30px rgba(0, 229, 255, 0.3), 0 0 50px rgba(0, 0, 0, 0.8);
+}
+
+@keyframes logo-glow {
+  0% {
+    filter: drop-shadow(0 0 10px rgba(0, 162, 255, 0.4)) brightness(1);
+  }
+
+  50% {
+    filter: drop-shadow(0 0 25px rgba(255, 115, 0, 0.6)) brightness(1.2);
+  }
+
+  100% {
+    filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.5)) brightness(1.1);
+  }
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .subtitle-container {
