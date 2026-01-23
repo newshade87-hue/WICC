@@ -1,5 +1,8 @@
 export const WICC_MEMBERS = [
-    "Member 1", "Member 2", "Member 3", "Member 4", "Member 5"
+    'Prasath', 'Karthik', 'Dr K', 'Yash', 'Nitin', 'Vijay', 'Kabi', 'Anshul',
+    'Prince', 'Max', 'Vivek', 'Samir', 'Ram', 'Dj', 'Gaurav', 'Feroz',
+    'Shubha', 'Adithya', 'Akshay', 'Ankit', 'Arun Nautiya', 'Kuru', 'Rana',
+    'Rushi', 'Shree'
 ].sort();
 
 export type MatchFormat = '1-Inning' | '2-Innings';
