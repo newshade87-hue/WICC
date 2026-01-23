@@ -97,7 +97,7 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
     };
 
     return (
-        <div className={`form-card ${editingMatch ? 'editing-active' : ''}`} style={{ transition: 'all 0.5s', border: editingMatch ? '2px solid var(--accent-cyan)' : '1px solid rgba(255,255,255,0.05)' }}>
+        <div id="match-form" className={`form-card ${editingMatch ? 'editing-active' : ''}`} style={{ transition: 'all 0.5s', border: editingMatch ? '2px solid var(--accent-cyan)' : '1px solid rgba(255,255,255,0.05)' }}>
             <div className="flex-between" style={{ marginBottom: '1.5rem' }}>
                 <h3 className="orbitron" style={{ fontSize: '1rem', color: editingMatch ? 'var(--accent-cyan)' : 'white' }}>
                     {editingMatch ? 'EDIT MATCH RECORD' : 'RECORD NEW MATCH'}

@@ -114,15 +114,18 @@ body {
 
 @keyframes logo-glow {
   0% {
-    filter: drop-shadow(0 0 10px rgba(0, 162, 255, 0.4)) brightness(1);
+    filter: drop-shadow(0 0 15px rgba(0, 162, 255, 0.6)) hue-rotate(0deg) brightness(1.1);
+    transform: scale(1);
   }
 
   50% {
-    filter: drop-shadow(0 0 25px rgba(255, 115, 0, 0.6)) brightness(1.2);
+    filter: drop-shadow(0 0 35px rgba(255, 115, 0, 0.8)) hue-rotate(180deg) brightness(1.4);
+    transform: scale(1.03);
   }
 
   100% {
-    filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.5)) brightness(1.1);
+    filter: drop-shadow(0 0 20px rgba(0, 229, 255, 0.7)) hue-rotate(360deg) brightness(1.2);
+    transform: scale(1);
   }
 }
 
@@ -334,6 +337,26 @@ body {
   margin-top: 3rem;
   border: 1px solid rgba(255, 255, 255, 0.05);
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+  scroll-margin-top: 2rem;
+  transition: all 0.5s ease;
+}
+
+.editing-active {
+  border: 2px solid var(--accent-cyan) !important;
+  box-shadow: 0 0 40px rgba(0, 229, 255, 0.3), 0 30px 60px rgba(0, 0, 0, 0.7) !important;
+  animation: pulse-edit 2s infinite alternate;
+}
+
+@keyframes pulse-edit {
+  from {
+    border-color: rgba(0, 229, 255, 0.4);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.1);
+  }
+
+  to {
+    border-color: rgba(0, 229, 255, 1);
+    box-shadow: 0 0 40px rgba(0, 229, 255, 0.3);
+  }
 }
 
 .form-row {

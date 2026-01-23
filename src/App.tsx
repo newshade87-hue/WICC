@@ -69,6 +69,7 @@ const App: React.FC = () => {
       scale: 2,
       windowWidth: element.scrollWidth,
       windowHeight: element.scrollHeight,
+      ignoreElements: (el) => el.classList.contains('btn-snapshot-hide') || el.tagName === 'BUTTON'
     });
     const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
     const link = document.createElement('a');
@@ -105,7 +106,7 @@ const App: React.FC = () => {
     <div className="container" style={{ paddingBottom: '10rem' }}>
       {/* Header Section */}
       <header className="header">
-        <button onClick={takeScreenshot} className="btn-outline btn-blue-outline" style={{ position: 'absolute', top: 0, right: 0, fontSize: '10px' }}>
+        <button onClick={takeScreenshot} className="btn-outline btn-blue-outline btn-snapshot-hide" style={{ position: 'absolute', top: 0, right: 0, fontSize: '10px' }}>
           <Camera size={14} /> FULL SNAPSHOT
         </button>
         <div className="logo-container">
@@ -199,15 +200,39 @@ const App: React.FC = () => {
                 </td>
                 <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{m.teamonepoints}-{m.teamtwopoints}</td>
                 <td style={{ textAlign: 'center' }}>
-                  <div className="orbitron" style={{ color: '#ffcc00', fontSize: '10px', fontWeight: 'bold' }}>MOM: {m.mom}</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', justifyContent: 'center', marginTop: '0.2rem' }}>
-                    {m.moi1 && <span style={{ fontSize: '7px', background: 'rgba(0,162,255,0.1)', color: '#00e5ff', padding: '2px 4px', borderRadius: '4px' }}>MOI 1: {m.moi1}</span>}
-                    {m.moi2 && <span style={{ fontSize: '7px', background: 'rgba(255,115,0,0.1)', color: '#ff9100', padding: '2px 4px', borderRadius: '4px' }}>MOI 2: {m.moi2}</span>}
+                  <div className="orbitron" style={{ color: '#ffcc00', fontSize: '11px', fontWeight: '900', textShadow: '0 0 10px rgba(255,204,0,0.3)' }}>{m.mom}</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', justifyContent: 'center', marginTop: '0.4rem' }}>
+                    {m.moi1 && (
+                      <span style={{
+                        fontSize: '8px',
+                        background: 'rgba(0,229,255,0.1)',
+                        color: '#00e5ff',
+                        padding: '3px 8px',
+                        borderRadius: '20px',
+                        border: '1px solid rgba(0,229,255,0.2)',
+                        fontWeight: 'bold'
+                      }}>
+                        {m.moi1}
+                      </span>
+                    )}
+                    {m.moi2 && (
+                      <span style={{
+                        fontSize: '8px',
+                        background: 'rgba(255,115,0,0.1)',
+                        color: '#ff9100',
+                        padding: '3px 8px',
+                        borderRadius: '20px',
+                        border: '1px solid rgba(255,115,0,0.2)',
+                        fontWeight: 'bold'
+                      }}>
+                        {m.moi2}
+                      </span>
+                    )}
                   </div>
                 </td>
                 <td style={{ textAlign: 'center' }}>
                   <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                    <Edit2 size={14} className="text-cyan-500 cursor-pointer hover:scale-110 transition" onClick={() => { setEditingMatch(m); window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }} />
+                    <Edit2 size={14} className="text-cyan-500 cursor-pointer hover:scale-110 transition" onClick={() => { setEditingMatch(m); document.getElementById('match-form')?.scrollIntoView({ behavior: 'smooth' }); }} />
                     <Trash2 size={16} className="text-red-500 cursor-pointer hover:scale-110 transition" onClick={() => handleDelete(m.id!)} />
                   </div>
                 </td>
