@@ -29,6 +29,13 @@ export interface MatchData {
     is_archived?: boolean;
 }
 
+export interface TeamMember {
+    id: string;
+    name: string;
+    team: 'blue' | 'orange';
+    created_at?: string;
+}
+
 export const calculatePoints = (format: MatchFormat, score1: number, score2: number): { pts1: number; pts2: number } => {
     if (score1 > score2) return { pts1: format === '1-Inning' ? 2 : 3, pts2: 0 };
     if (score2 > score1) return { pts1: 0, pts2: format === '1-Inning' ? 2 : 3 };

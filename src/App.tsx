@@ -3,8 +3,9 @@ import { supabase } from './supabaseClient';
 import { MatchForm } from './MatchForm';
 import { AwardsHub } from './AwardsHub';
 import { ExportTool } from './ExportTool';
+import { MembersHub } from './MembersHub';
 import type { MatchData } from './types';
-import { Trophy, Users, Activity } from 'lucide-react';
+import { Trophy, Users, Activity, FileSpreadsheet, RotateCcw } from 'lucide-react';
 
 const App: React.FC = () => {
   const [matches, setMatches] = useState<MatchData[]>([]);
@@ -38,108 +39,109 @@ const App: React.FC = () => {
   }, { ptsA: 0, ptsB: 0 });
 
   const champion = totals.ptsA >= 10 ? 'TEAM BLUE' : totals.ptsB >= 10 ? 'TEAM ORANGE' : null;
+  const inLead = totals.ptsA > totals.ptsB ? 'TEAM BLUE' : totals.ptsB > totals.ptsA ? 'TEAM ORANGE' : 'DRAW';
 
   return (
-    <div className="max-w-6xl mx-auto p-4 md:p-8 pb-32">
+    <div className="max-w-7xl mx-auto p-4 md:p-8">
+      {/* Header Section */}
       <header className="text-center mb-12">
-        <h1 className="text-5xl md:text-7xl orbitron font-bold text-transparent bg-clip-text bg-gradient-to-b from-cyan-300 to-blue-600 header-pulse inline-block">
-          WICC
-        </h1>
-        <p className="text-xs tracking-[0.5em] text-cyan-500 mt-2 font-semibold">CORE RECORDER V.2 CLOUD</p>
+        <h1 className="logo-main orbitron mb-0">WICC</h1>
+        <div className="flex items-center justify-center gap-4 -mt-4">
+          <div className="h-1.5 w-16 bg-gradient-to-r from-transparent to-cyan-500 rounded-full"></div>
+          <span className="orbitron text-[10px] tracking-[0.5em] text-cyan-500 font-bold uppercase">Premier Recorder</span>
+          <div className="h-1.5 w-16 bg-gradient-to-l from-transparent to-orange-500 rounded-full"></div>
+        </div>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-        <div className={`relative overflow-hidden glass p-6 text-center transition-all ${champion === 'TEAM BLUE' ? 'border-2 border-yellow-500 shadow-[0_0_30px_rgba(251,191,36,0.3)]' : 'glow-a'}`}>
-          <div className="absolute top-0 left-0 w-full h-1 bg-cyan-500 opacity-30"></div>
-          <h3 className="orbitron text-cyan-400 flex items-center justify-center gap-2 mb-2">
-            <Users className="w-5 h-5" /> TEAM BLUE
-          </h3>
-          <div className="text-5xl orbitron font-bold mono text-white">{totals.ptsA}</div>
-          <p className="text-[10px] text-slate-500 uppercase mt-2">Series Points</p>
+      {/* Top Scorecards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        {/* Team Blue Total */}
+        <div className="card-glass p-8 card-blue text-center flex flex-col justify-center min-h-[160px]">
+          <span className="orbitron text-[10px] text-cyan-500 mb-2 uppercase tracking-widest font-bold">Team Blue</span>
+          <span className="text-7xl orbitron font-black text-white">{totals.ptsA}</span>
         </div>
-        <div className={`relative overflow-hidden glass p-6 text-center transition-all ${champion === 'TEAM ORANGE' ? 'border-2 border-yellow-500 shadow-[0_0_30px_rgba(251,191,36,0.3)]' : 'glow-b'}`}>
-          <div className="absolute top-0 left-0 w-full h-1 bg-orange-500 opacity-30"></div>
-          <h3 className="orbitron text-orange-400 flex items-center justify-center gap-2 mb-2">
-            <Users className="w-5 h-5" /> TEAM ORANGE
-          </h3>
-          <div className="text-5xl orbitron font-bold mono text-white">{totals.ptsB}</div>
-          <p className="text-[10px] text-slate-500 uppercase mt-2">Series Points</p>
+
+        {/* Target / Status */}
+        <div className="card-glass p-8 card-center text-center flex flex-col justify-center min-h-[160px] border-slate-700">
+          <span className="orbitron text-[10px] text-slate-500 mb-4 uppercase tracking-widest font-bold">Target: 10 Pts</span>
+          <span className={`text-4xl orbitron font-bold tracking-widest ${inLead === 'DRAW' ? 'text-white' : inLead === 'TEAM BLUE' ? 'text-cyan-400' : 'text-orange-400'}`}>
+            {champion ? 'WINNER' : inLead}
+          </span>
+        </div>
+
+        {/* Team Orange Total */}
+        <div className="card-glass p-8 card-orange text-center flex flex-col justify-center min-h-[160px]">
+          <span className="orbitron text-[10px] text-orange-500 mb-2 uppercase tracking-widest font-bold">Team Orange</span>
+          <span className="text-7xl orbitron font-black text-white">{totals.ptsB}</span>
         </div>
       </div>
 
-      {champion && (
-        <div className="glass p-8 mb-12 text-center border-yellow-500 shadow-[0_0_40px_rgba(251,191,36,0.2)] animate-pulse">
-          <Trophy className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
-          <h2 className="orbitron text-4xl text-yellow-400">SERIES CHAMPIONS</h2>
-          <p className="orbitron text-2xl text-white mt-2 font-bold tracking-widest">{champion}</p>
+      {/* Global Actions Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-6 mb-8">
+        <div className="flex gap-4">
+          <button className="px-6 py-2 border border-cyan-800 bg-cyan-900/20 text-cyan-400 orbitron text-[10px] rounded hover:bg-cyan-900/40 transition-all flex items-center gap-2">
+            <FileSpreadsheet className="w-3.5 h-3.5" /> EXCEL
+          </button>
+          <button className="px-6 py-2 border border-red-800 bg-red-900/20 text-red-500 orbitron text-[10px] rounded hover:bg-red-900/40 transition-all flex items-center gap-2">
+            <RotateCcw className="w-3.5 h-3.5" /> RESET
+          </button>
         </div>
-      )}
 
-      <MatchForm onSave={fetchData} />
-
-      {seriesInfo && (
-        <ExportTool
-          series={{ ...seriesInfo, ptsA: totals.ptsA, ptsB: totals.ptsB, champion }}
-        />
-      )}
-
-      <AwardsHub onUpdate={fetchData} />
-
-      <div className="glass overflow-hidden">
-        <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
-          <h2 className="orbitron text-xs flex items-center gap-2 text-cyan-500">
-            <Activity className="w-4 h-4" /> Deployment Dashboard
-          </h2>
-          <span className="text-[10px] text-slate-500 orbitron">V2.0.0-Cloud</span>
+        <div className="flex-1 max-w-lg bg-slate-900/80 rounded-full p-1.5 flex items-center justify-between border border-slate-800">
+          <div className="flex-1 bg-cyan-600 rounded-full py-2 orbitron text-[10px] font-bold text-center text-white shadow-[0_0_15px_rgba(0,162,255,0.4)]">TEAM BLUE</div>
+          <span className="px-6 orbitron italic text-slate-500 text-xs font-black">VS</span>
+          <div className="flex-1 bg-orange-700 rounded-full py-2 orbitron text-[10px] font-bold text-center text-white shadow-[0_0_15px_rgba(255,115,0,0.4)]">TEAM ORANGE</div>
         </div>
+
+        <div className="hidden md:block">
+          <button className="px-6 py-2 border border-slate-700 text-slate-500 orbitron text-[10px] rounded bg-slate-900/50 hover:text-white transition-all">
+            VIEW HISTORY
+          </button>
+        </div>
+      </div>
+
+      {/* History Table Container */}
+      <div className="card-glass overflow-hidden mb-12 border-slate-800">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs mono">
-            <thead className="bg-slate-900 text-slate-500 uppercase tracking-tighter">
+          <table className="wicc-table text-xs">
+            <thead>
               <tr>
-                <th className="p-4 border-r border-slate-800">Match</th>
-                <th className="p-4 border-r border-slate-800">Date</th>
-                <th className="p-4 border-r border-slate-800 text-center">Innings</th>
-                <th className="p-4 border-r border-slate-800">Team Blue</th>
-                <th className="p-4 border-r border-slate-800">Team Orange</th>
-                <th className="p-4 border-r border-slate-800 text-center">Winner</th>
-                <th className="p-4">MVP</th>
+                <th className="text-left">Date</th>
+                <th className="text-left">Match</th>
+                <th className="text-left">Team Blue</th>
+                <th className="text-left">Team Orange</th>
+                <th className="text-center">Overs</th>
+                <th className="text-center">Winner</th>
+                <th className="text-center">Pts</th>
+                <th className="text-center">Awards</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800">
+            <tbody className="mono">
               {matches.map((m) => (
-                <tr key={m.id} className="hover:bg-cyan-500/5 transition-colors group">
-                  <td className="p-4 text-cyan-400 font-bold border-r border-slate-800">#{m.matchnumber}</td>
-                  <td className="p-4 text-slate-400 border-r border-slate-800">{m.date}</td>
-                  <td className="p-4 text-slate-500 border-r border-slate-800 text-center">{m.innings === '1-Inning' ? '1-INN' : '2-INN'}</td>
-                  <td className="p-4 text-cyan-100 border-r border-slate-800">
-                    <div className="flex justify-between">
-                      <span>{m.teamonescore}</span>
-                      <span className="text-cyan-600 text-[10px]">{m.teamonepoints}PT</span>
-                    </div>
-                  </td>
-                  <td className="p-4 text-orange-100 border-r border-slate-800">
-                    <div className="flex justify-between">
-                      <span>{m.teamtwoscore}</span>
-                      <span className="text-orange-600 text-[10px]">{m.teamtwopoints}PT</span>
-                    </div>
-                  </td>
-                  <td className="p-4 text-center border-r border-slate-800">
-                    <span className={`px-2 py-1 rounded inline-block min-w-[60px] text-[8px] font-bold ${parseInt(m.teamonepoints || '0') > parseInt(m.teamtwopoints || '0')
-                        ? 'bg-cyan-900 border border-cyan-700 text-cyan-300'
+                <tr key={m.id}>
+                  <td className="text-slate-400">{m.date}</td>
+                  <td className="text-cyan-400 font-bold tracking-widest">{m.matchnumber}</td>
+                  <td className="text-cyan-100">{m.teamonescore} <span className="text-[10px] text-slate-500">runs</span></td>
+                  <td className="text-orange-100">{m.teamtwoscore} <span className="text-[10px] text-slate-500">runs</span></td>
+                  <td className="text-center text-slate-400">{m.overs || '---'}</td>
+                  <td className="text-center">
+                    <span className={`px-3 py-1 rounded text-[9px] font-black orbitron ${parseInt(m.teamonepoints || '0') > parseInt(m.teamtwopoints || '0')
+                        ? 'text-cyan-400'
                         : parseInt(m.teamtwopoints || '0') > parseInt(m.teamonepoints || '0')
-                          ? 'bg-orange-900 border border-orange-700 text-orange-300'
-                          : 'bg-slate-800 border border-slate-700 text-slate-400'
+                          ? 'text-orange-400'
+                          : 'text-slate-500'
                       }`}>
                       {parseInt(m.teamonepoints || '0') > parseInt(m.teamtwopoints || '0') ? 'BLUE' : parseInt(m.teamtwopoints || '0') > parseInt(m.teamonepoints || '0') ? 'ORANGE' : 'DRAW'}
                     </span>
                   </td>
-                  <td className="p-4 text-yellow-400 orbitron group-hover:text-yellow-300 transition-colors">{m.mom}</td>
+                  <td className="text-center text-white font-bold">{m.teamonepoints}-{m.teamtwopoints}</td>
+                  <td className="text-center text-yellow-400 orbitron text-[10px]">{m.mom}</td>
                 </tr>
               ))}
               {matches.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="p-12 text-center text-slate-600 orbitron text-xs tracking-widest">
-                    No Match Data Found. Initialize Series Recording.
+                  <td colSpan={8} className="p-12 text-center text-slate-600 orbitron text-[10px] uppercase tracking-[0.3em]">
+                    System Waiting for Match Entry Data
                   </td>
                 </tr>
               )}
@@ -147,6 +149,20 @@ const App: React.FC = () => {
           </table>
         </div>
       </div>
+
+      <MatchForm onSave={fetchData} />
+
+      <MembersHub onUpdate={fetchData} />
+
+      {seriesInfo && (
+        <AwardsHub onUpdate={fetchData} seriesData={seriesInfo} />
+      )}
+
+      {seriesInfo && (
+        <ExportTool
+          series={{ ...seriesInfo, ptsA: totals.ptsA, ptsB: totals.ptsB, champion }}
+        />
+      )}
     </div>
   );
 };
