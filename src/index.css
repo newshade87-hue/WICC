@@ -758,41 +758,55 @@ select {
 }
 
 .card-animate-blue {
-  background: linear-gradient(135deg, rgba(0, 162, 255, 0.05), rgba(0, 229, 255, 0.1));
+  background: linear-gradient(135deg, rgba(0, 162, 255, 0.03), rgba(0, 229, 255, 0.08));
   position: relative;
   overflow: hidden;
+  border-color: rgba(0, 162, 255, 0.4) !important;
 }
 
-.card-animate-blue::after {
+.card-animate-blue::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(45deg, transparent, rgba(0, 162, 255, 0.1), transparent);
-  background-size: 200% 200%;
-  animation: shine-move 3s linear infinite;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(0, 162, 255, 0.15) 0%, transparent 70%);
+  animation: pulse-glow 4s ease-in-out infinite alternate;
   pointer-events: none;
+  z-index: 0;
 }
 
 .card-animate-orange {
-  background: linear-gradient(135deg, rgba(255, 115, 0, 0.05), rgba(255, 145, 0, 0.1));
+  background: linear-gradient(135deg, rgba(255, 115, 0, 0.03), rgba(255, 145, 0, 0.08));
   position: relative;
   overflow: hidden;
+  border-color: rgba(255, 115, 0, 0.4) !important;
 }
 
-.card-animate-orange::after {
+.card-animate-orange::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(45deg, transparent, rgba(255, 115, 0, 0.1), transparent);
-  background-size: 200% 200%;
-  animation: shine-move 3s linear infinite;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(255, 115, 0, 0.15) 0%, transparent 70%);
+  animation: pulse-glow 4s ease-in-out infinite alternate;
   pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes pulse-glow {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.3;
+  }
+
+  100% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
 }
 
 @keyframes shine-move {

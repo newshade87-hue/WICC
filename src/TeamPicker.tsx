@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
-import { Users, Zap, Shield, Sword, RefreshCw, Check, X, Edit3, Plus } from 'lucide-react';
+import { Users, Zap, Shield, Sword, RefreshCw, Check, X, Edit3, Plus, Trash } from 'lucide-react';
 import { type PlayerProfile } from './types';
 
 export const TeamPicker: React.FC<{ isOpen: boolean, onClose: () => void, onComplete: () => void }> = ({ isOpen, onClose, onComplete }) => {
@@ -63,6 +63,16 @@ export const TeamPicker: React.FC<{ isOpen: boolean, onClose: () => void, onComp
         setLoading(false);
     };
 
+    const handleDeletePlayer = async (id: string) => {
+        if (window.confirm('Delete this player permanently?')) {
+            const { error } = await supabase.from('wicc_players').delete().eq('id', id);
+            if (!error) {
+                setEditingPlayer(null);
+                fetchPlayers();
+            }
+        }
+    };
+
     const handleCommit = async () => {
         setLoading(true);
         await supabase.from('wicc_members').delete().neq('id', '00000000-0000-0000-0000-000000000000');
@@ -108,7 +118,12 @@ export const TeamPicker: React.FC<{ isOpen: boolean, onClose: () => void, onComp
                             </div>
                         </div>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <button onClick={() => handleSavePlayer(editingPlayer)} className="btn-commit orbitron" style={{ flex: 1, fontSize: '0.7rem' }}>SAVE</button>
+                            <button onClick={() => handleSavePlayer(editingPlayer)} className="btn-commit orbitron" style={{ flex: 2, fontSize: '0.7rem', background: '#22c55e' }}>SAVE</button>
+                            {editingPlayer.id && (
+                                <button onClick={() => handleDeletePlayer(editingPlayer.id!)} className="btn-outline btn-red-outline" style={{ flex: 1, padding: 0 }}>
+                                    <Trash size={14} />
+                                </button>
+                            )}
                             <button onClick={() => setEditingPlayer(null)} className="btn-outline btn-red-outline" style={{ flex: 1, fontSize: '0.7rem' }}>CANCEL</button>
                         </div>
                     </div>
