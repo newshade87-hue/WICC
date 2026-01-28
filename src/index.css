@@ -444,6 +444,7 @@ select {
   padding: 0.7rem 1.5rem;
   font-size: 0.75rem;
   border-radius: 8px;
+  border-radius: 8px;
   font-family: 'Orbitron', sans-serif;
   transition: all 0.3s;
   font-weight: 900;
@@ -452,6 +453,23 @@ select {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+}
+
+.btn-flash {
+  animation: flash-btn 1.5s infinite alternate;
+}
+
+@keyframes flash-btn {
+  0% {
+    background: rgba(0, 162, 255, 0.1);
+    border-color: rgba(0, 162, 255, 0.3);
+  }
+
+  100% {
+    background: rgba(0, 229, 255, 0.3);
+    border-color: rgba(0, 229, 255, 0.8);
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
+  }
 }
 
 .btn-blue-outline {

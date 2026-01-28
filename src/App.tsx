@@ -3,7 +3,6 @@ import { supabase } from './supabaseClient';
 import { MatchForm } from './MatchForm';
 import { AwardsHub } from './AwardsHub';
 import { ExportTool } from './ExportTool';
-import { MembersHub } from './MembersHub';
 import type { MatchData } from './types';
 import { Trash2, Edit2, Download, RotateCcw, Camera, History } from 'lucide-react';
 import wiccLogo from './assets/wicc_logo.png';
@@ -314,7 +313,6 @@ const App: React.FC = () => {
         editingMatch={editingMatch}
         onCancel={() => setEditingMatch(null)}
       />
-      <MembersHub onUpdate={fetchData} />
       {seriesInfo && <AwardsHub onUpdate={fetchData} seriesData={seriesInfo} />}
       {seriesInfo && <ExportTool series={{ ...seriesInfo, ptsA: totals.ptsA, ptsB: totals.ptsB, champion }} />}
 
@@ -326,7 +324,7 @@ const App: React.FC = () => {
         <button onClick={exportToExcel} className="btn-outline btn-blue-outline">
           <Download size={14} /> EXCEL
         </button>
-        <button onClick={() => setIsTeamPickerOpen(true)} className="btn-outline btn-blue-outline">
+        <button onClick={() => setIsTeamPickerOpen(true)} className="btn-outline btn-blue-outline btn-flash">
           <Users size={14} /> TEAM SELECTION
         </button>
         <button onClick={() => setIsHistoryOpen(true)} className="btn-outline btn-blue-outline">
