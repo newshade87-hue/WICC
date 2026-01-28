@@ -193,6 +193,7 @@ body {
   background: conic-gradient(transparent, var(--card-glow-color), transparent 30%);
   animation: rotate 4s linear infinite;
   opacity: 0.15;
+  pointer-events: none;
 }
 
 @keyframes rotate {
