@@ -10,6 +10,8 @@ import wiccLogo from './assets/wicc_logo.png';
 import html2canvas from 'html2canvas';
 import { HistoryView } from './HistoryView';
 import { RosterWidget } from './RosterWidget';
+import { TeamPicker } from './TeamPicker';
+import { Users } from 'lucide-react';
 import type { TeamMember } from './types';
 
 const App: React.FC = () => {
@@ -19,6 +21,7 @@ const App: React.FC = () => {
   const [teamTwoName, setTeamTwoName] = useState('TEAM ORANGE');
   const [editingMatch, setEditingMatch] = useState<MatchData | null>(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isTeamPickerOpen, setIsTeamPickerOpen] = useState(false);
   const [blueMembers, setBlueMembers] = useState<TeamMember[]>([]);
   const [orangeMembers, setOrangeMembers] = useState<TeamMember[]>([]);
 
@@ -323,6 +326,9 @@ const App: React.FC = () => {
         <button onClick={exportToExcel} className="btn-outline btn-blue-outline">
           <Download size={14} /> EXCEL
         </button>
+        <button onClick={() => setIsTeamPickerOpen(true)} className="btn-outline btn-blue-outline">
+          <Users size={14} /> TEAM SELECTION
+        </button>
         <button onClick={() => setIsHistoryOpen(true)} className="btn-outline btn-blue-outline">
           <History size={14} /> HISTORY
         </button>
@@ -332,6 +338,7 @@ const App: React.FC = () => {
       </div>
 
       <HistoryView isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} />
+      <TeamPicker isOpen={isTeamPickerOpen} onClose={() => setIsTeamPickerOpen(false)} onComplete={fetchData} />
     </div >
   );
 };

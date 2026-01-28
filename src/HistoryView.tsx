@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
-import { Trophy, Calendar, Zap, Star, Award, Shield, X, History } from 'lucide-react';
+import { Trophy, Calendar, Zap, Star, Award, Shield, X, History, Trash2, Edit2, Check } from 'lucide-react';
 
 export const HistoryView: React.FC<{ isOpen: boolean, onClose: () => void }> = ({ isOpen, onClose }) => {
     const [history, setHistory] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editValues, setEditValues] = useState<any>({});
 
     useEffect(() => {
         if (isOpen) {
@@ -23,6 +25,51 @@ export const HistoryView: React.FC<{ isOpen: boolean, onClose: () => void }> = (
             setHistory(data);
         }
         setLoading(false);
+    };
+
+    const handleDelete = async (id: string) => {
+        if (window.confirm('PERMANENTLY DELETE this archive? This cannot be undone.')) {
+            const { error } = await supabase.from('wicc_series_history').delete().eq('id', id);
+            if (!error) fetchHistory();
+        }
+    };
+
+    const handleEdit = (record: any) => {
+        setEditingId(record.id);
+        setEditValues({
+            winner: record.winner,
+            points_a: record.points_a,
+            points_b: record.points_b,
+            mos: record.awards?.mos || '',
+            mvp: record.awards?.mvp || '',
+            wickets: record.awards?.wickets || '',
+            runs: record.awards?.runs || ''
+        });
+    };
+
+    const handleSaveEdit = async () => {
+        const updatedAwards = {
+            ...history.find(h => h.id === editingId).awards,
+            mos: editValues.mos,
+            mvp: editValues.mvp,
+            wickets: editValues.wickets,
+            runs: editValues.runs
+        };
+
+        const { error } = await supabase
+            .from('wicc_series_history')
+            .update({
+                winner: editValues.winner,
+                points_a: editValues.points_a,
+                points_b: editValues.points_b,
+                awards: updatedAwards
+            })
+            .eq('id', editingId);
+
+        if (!error) {
+            setEditingId(null);
+            fetchHistory();
+        }
     };
 
     if (!isOpen) return null;
@@ -53,35 +100,90 @@ export const HistoryView: React.FC<{ isOpen: boolean, onClose: () => void }> = (
                                         <Calendar size={12} style={{ marginRight: '6px' }} />
                                         {new Date(record.start_date).toLocaleDateString()} - {new Date(record.end_date).toLocaleDateString()}
                                     </div>
-                                    <Trophy size={20} color={record.winner.includes('BLUE') ? 'var(--team-blue)' : 'var(--team-orange)'} />
+                                    <div style={{ display: 'flex', gap: '0.8rem' }}>
+                                        {editingId === record.id ? (
+                                            <Check size={18} className="text-green-500 cursor-pointer" onClick={handleSaveEdit} />
+                                        ) : (
+                                            <Edit2 size={16} className="text-cyan-500 cursor-pointer opacity-50 hover:opacity-100" onClick={() => handleEdit(record)} />
+                                        )}
+                                        <Trash2 size={16} className="text-red-500 cursor-pointer opacity-50 hover:opacity-100" onClick={() => handleDelete(record.id)} />
+                                        <Trophy size={18} color={record.winner.includes('BLUE') ? 'var(--team-blue)' : 'var(--team-orange)'} />
+                                    </div>
                                 </div>
 
-                                <h3 className="orbitron" style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: record.winner.includes('BLUE') ? 'var(--team-blue)' : 'var(--team-orange)' }}>
-                                    WINNER: {record.winner}
-                                </h3>
+                                {editingId === record.id ? (
+                                    <input
+                                        className="orbitron"
+                                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--accent-cyan)', color: 'white', width: '100%', marginBottom: '0.5rem', padding: '0.2rem' }}
+                                        value={editValues.winner}
+                                        onChange={e => setEditValues({ ...editValues, winner: e.target.value })}
+                                    />
+                                ) : (
+                                    <h3 className="orbitron" style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: record.winner.includes('BLUE') ? 'var(--team-blue)' : 'var(--team-orange)' }}>
+                                        WINNER: {record.winner}
+                                    </h3>
+                                )}
 
                                 <div className="flex-between" style={{ background: 'rgba(0,0,0,0.3)', padding: '0.75rem', borderRadius: '10px', marginBottom: '1.5rem' }}>
-                                    <div className="orbitron" style={{ fontSize: '0.8rem' }}>BLUE: {record.points_a} PTS</div>
-                                    <div className="orbitron" style={{ fontSize: '0.8rem', opacity: 0.5 }}>VS</div>
-                                    <div className="orbitron" style={{ fontSize: '0.8rem' }}>ORANGE: {record.points_b} PTS</div>
+                                    {editingId === record.id ? (
+                                        <>
+                                            <input type="number" style={{ width: '40px', background: 'transparent', border: 'none', borderBottom: '1px solid gray', color: 'white' }} value={editValues.points_a} onChange={e => setEditValues({ ...editValues, points_a: e.target.value })} />
+                                            <div className="orbitron" style={{ fontSize: '0.8rem', opacity: 0.5 }}>VS</div>
+                                            <input type="number" style={{ width: '40px', background: 'transparent', border: 'none', borderBottom: '1px solid gray', color: 'white' }} value={editValues.points_b} onChange={e => setEditValues({ ...editValues, points_b: e.target.value })} />
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="orbitron" style={{ fontSize: '0.8rem' }}>BLUE: {record.points_a} PTS</div>
+                                            <div className="orbitron" style={{ fontSize: '0.8rem', opacity: 0.5 }}>VS</div>
+                                            <div className="orbitron" style={{ fontSize: '0.8rem' }}>ORANGE: {record.points_b} PTS</div>
+                                        </>
+                                    )}
                                 </div>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                                    <div className="award-tiny">
-                                        <Star size={10} color="#ff7300" />
-                                        <span className="orbitron" style={{ fontSize: '0.55rem' }}>MOS: {record.awards?.mos || 'N/A'}</span>
+                                    <div className="award-tiny" style={{ background: 'rgba(255,204,0,0.1)', border: '1px solid rgba(255,204,0,0.2)' }}>
+                                        <Star size={12} color="#ffcc00" />
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <span className="orbitron" style={{ fontSize: '0.5rem', opacity: 0.7 }}>MOS</span>
+                                            {editingId === record.id ? (
+                                                <input style={{ background: 'transparent', border: 'none', color: '#ffcc00', fontSize: '0.8rem', fontWeight: 'bold' }} value={editValues.mos} onChange={e => setEditValues({ ...editValues, mos: e.target.value })} />
+                                            ) : (
+                                                <span className="orbitron" style={{ fontSize: '1rem', fontWeight: '900', color: '#ffcc00' }}>{record.awards?.mos || 'N/A'}</span>
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="award-tiny">
                                         <Zap size={10} color="#00e5ff" />
-                                        <span className="orbitron" style={{ fontSize: '0.55rem' }}>MVP: {record.awards?.mvp || 'N/A'}</span>
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <span className="orbitron" style={{ fontSize: '0.55rem' }}>MVP</span>
+                                            {editingId === record.id ? (
+                                                <input style={{ background: 'transparent', border: 'none', color: 'white', fontSize: '0.6rem' }} value={editValues.mvp} onChange={e => setEditValues({ ...editValues, mvp: e.target.value })} />
+                                            ) : (
+                                                <span className="orbitron" style={{ fontSize: '0.7rem' }}>{record.awards?.mvp || 'N/A'}</span>
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="award-tiny">
                                         <Shield size={10} color="#ef4444" />
-                                        <span className="orbitron" style={{ fontSize: '0.55rem' }}>WKTS: {record.awards?.wickets || 'N/A'}</span>
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <span className="orbitron" style={{ fontSize: '0.55rem' }}>WKTS</span>
+                                            {editingId === record.id ? (
+                                                <input style={{ background: 'transparent', border: 'none', color: 'white', fontSize: '0.6rem' }} value={editValues.wickets} onChange={e => setEditValues({ ...editValues, wickets: e.target.value })} />
+                                            ) : (
+                                                <span className="orbitron" style={{ fontSize: '0.7rem' }}>{record.awards?.wickets || 'N/A'}</span>
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="award-tiny">
                                         <Award size={10} color="#22c55e" />
-                                        <span className="orbitron" style={{ fontSize: '0.55rem' }}>RUNS: {record.awards?.runs || 'N/A'}</span>
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <span className="orbitron" style={{ fontSize: '0.55rem' }}>RUNS</span>
+                                            {editingId === record.id ? (
+                                                <input style={{ background: 'transparent', border: 'none', color: 'white', fontSize: '0.6rem' }} value={editValues.runs} onChange={e => setEditValues({ ...editValues, runs: e.target.value })} />
+                                            ) : (
+                                                <span className="orbitron" style={{ fontSize: '0.7rem' }}>{record.awards?.runs || 'N/A'}</span>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
