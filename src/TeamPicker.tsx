@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
-import { Users, Shield, Sword, RefreshCw, Check, X, Edit3, Plus, Trash, GripVertical } from 'lucide-react';
+import { Users, Shield, Sword, RefreshCw, Check, X, Edit3, Plus, Trash, GripVertical, Zap, Wind, Activity, Target } from 'lucide-react';
 import { type PlayerProfile } from './types';
 
 export const TeamPicker: React.FC<{ isOpen: boolean, onClose: () => void, onComplete: () => void }> = ({ isOpen, onClose, onComplete }) => {
@@ -60,6 +60,7 @@ export const TeamPicker: React.FC<{ isOpen: boolean, onClose: () => void, onComp
         const { error } = await supabase.from('wicc_players').upsert(payload);
         if (!error) {
             setEditingPlayer(null);
+            setEditMode(false);
             fetchPlayers();
         } else {
             alert("Error saving: " + error.message);
@@ -94,6 +95,53 @@ export const TeamPicker: React.FC<{ isOpen: boolean, onClose: () => void, onComp
     };
 
     const ROLE_OPTIONS = ['All Rounder', 'Fast Bowler', 'Medium Bowler', 'Batting Only', 'Spinner'];
+
+    const getRoleIcon = (role?: string) => {
+        switch (role) {
+            case 'All Rounder': return <Zap size={10} color="#fbbf24" />;
+            case 'Fast Bowler': return <Activity size={10} color="#f87171" />;
+            case 'Medium Bowler': return <Wind size={10} color="#60a5fa" />;
+            case 'Batting Only': return <Target size={10} color="#4ade80" />;
+            case 'Spinner': return <RefreshCw size={10} color="#a78bfa" />;
+            default: return <Users size={10} color="#94a3b8" />;
+        }
+    };
+
+    const renderPlayerTag = (name: string, location: 'pool' | 'A' | 'B') => {
+        const p = players.find(pl => pl.name === name) || { name, role: 'All Rounder' } as PlayerProfile;
+
+        return (
+            <div
+                key={name}
+                draggable={!editMode}
+                onDragStart={(e) => handleDragStart(e, name)}
+                style={{ position: 'relative' }}
+            >
+                <span
+                    className="roster-tag mono player-tag"
+                    onClick={() => !editMode && movePlayerTo(name, location === 'pool' ? 'A' : (location === 'A' ? 'B' : 'pool'))}
+                    style={{
+                        cursor: editMode ? 'default' : 'grab',
+                        borderColor: location === 'A' ? 'var(--team-blue)' : (location === 'B' ? 'var(--team-orange)' : undefined),
+                        opacity: editMode ? 0.7 : 1
+                    }}
+                >
+                    {!editMode && <GripVertical size={10} style={{ opacity: 0.3, marginRight: 2 }} />}
+                    {/* @ts-ignore */}
+                    <span style={{ marginRight: 4, display: 'flex', alignItems: 'center' }}>{getRoleIcon(p.role)}</span>
+                    {name}
+                </span>
+                {editMode && (
+                    <Edit3
+                        size={14}
+                        color="black"
+                        style={{ position: 'absolute', top: -7, right: -7, background: 'var(--accent-cyan)', borderRadius: '50%', padding: '2px', cursor: 'pointer', zIndex: 20, border: '1px solid white' }}
+                        onClick={(e) => { e.stopPropagation(); setEditingPlayer(p as PlayerProfile); }}
+                    />
+                )}
+            </div>
+        );
+    };
 
     return (
         <div className="team-picker-widget">
@@ -176,31 +224,7 @@ export const TeamPicker: React.FC<{ isOpen: boolean, onClose: () => void, onComp
                         </button>
                     </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.8rem' }}>
-                        {players.filter(p => !teamA.includes(p.name) && !teamB.includes(p.name)).map(p => (
-                            <div
-                                key={p.name}
-                                draggable={!editMode}
-                                onDragStart={(e) => handleDragStart(e, p.name)}
-                                style={{ position: 'relative' }}
-                            >
-                                <span
-                                    className="roster-tag mono player-tag"
-                                    onClick={() => !editMode && movePlayerTo(p.name, 'A')}
-                                    style={{ cursor: editMode ? 'default' : 'grab' }}
-                                >
-                                    {!editMode && <GripVertical size={10} style={{ opacity: 0.5 }} />}
-                                    {p.name}
-                                </span>
-                                {editMode && (
-                                    <Edit3
-                                        size={12}
-                                        color="black"
-                                        style={{ position: 'absolute', top: -6, right: -6, background: 'var(--accent-cyan)', borderRadius: '50%', padding: '2px', cursor: 'pointer', zIndex: 10 }}
-                                        onClick={(e) => { e.stopPropagation(); setEditingPlayer(p); }}
-                                    />
-                                )}
-                            </div>
-                        ))}
+                        {players.filter(p => !teamA.includes(p.name) && !teamB.includes(p.name)).map(p => renderPlayerTag(p.name, 'pool'))}
                     </div>
                 </div>
 
@@ -216,18 +240,7 @@ export const TeamPicker: React.FC<{ isOpen: boolean, onClose: () => void, onComp
                             <Shield size={12} color="var(--team-blue)" />
                         </div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.8rem' }}>
-                            {teamA.map(name => (
-                                <span
-                                    key={name}
-                                    draggable={!editMode}
-                                    onDragStart={(e) => handleDragStart(e, name)}
-                                    className="roster-tag mono player-tag"
-                                    style={{ cursor: 'grab', borderColor: 'var(--team-blue)' }}
-                                    onClick={() => !editMode && movePlayerTo(name, 'B')}
-                                >
-                                    {name}
-                                </span>
-                            ))}
+                            {teamA.map(name => renderPlayerTag(name, 'A'))}
                         </div>
                     </div>
 
@@ -242,18 +255,7 @@ export const TeamPicker: React.FC<{ isOpen: boolean, onClose: () => void, onComp
                             <Sword size={12} color="var(--team-orange)" />
                         </div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.8rem' }}>
-                            {teamB.map(name => (
-                                <span
-                                    key={name}
-                                    draggable={!editMode}
-                                    onDragStart={(e) => handleDragStart(e, name)}
-                                    className="roster-tag mono player-tag"
-                                    style={{ cursor: 'grab', borderColor: 'var(--team-orange)' }}
-                                    onClick={() => !editMode && movePlayerTo(name, 'pool')}
-                                >
-                                    {name}
-                                </span>
-                            ))}
+                            {teamB.map(name => renderPlayerTag(name, 'B'))}
                         </div>
                     </div>
                 </div>
