@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
-import { Users, Zap, Shield, Sword, RefreshCw, Check, X, Edit3, Plus, Trash, GripVertical } from 'lucide-react';
+import { Users, Shield, Sword, RefreshCw, Check, X, Edit3, Plus, Trash, GripVertical } from 'lucide-react';
 import { type PlayerProfile } from './types';
 
 export const TeamPicker: React.FC<{ isOpen: boolean, onClose: () => void, onComplete: () => void }> = ({ isOpen, onClose, onComplete }) => {
