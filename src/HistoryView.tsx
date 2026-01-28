@@ -94,8 +94,8 @@ export const HistoryView: React.FC<{ isOpen: boolean, onClose: () => void }> = (
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '1.5rem' }}>
                         {history.map((record) => (
-                            <div key={record.id} className="history-card">
-                                <div className="flex-between" style={{ marginBottom: '1.5rem' }}>
+                            <div key={record.id} className={`history-card ${record.winner.includes('BLUE') ? 'card-animate-blue' : 'card-animate-orange'}`}>
+                                <div className="flex-between" style={{ marginBottom: '1.5rem', position: 'relative', zIndex: 1 }}>
                                     <div className="badge badge-blue">
                                         <Calendar size={12} style={{ marginRight: '6px' }} />
                                         {new Date(record.start_date).toLocaleDateString()} - {new Date(record.end_date).toLocaleDateString()}
@@ -148,7 +148,7 @@ export const HistoryView: React.FC<{ isOpen: boolean, onClose: () => void }> = (
                                             {editingId === record.id ? (
                                                 <input style={{ background: 'transparent', border: 'none', color: '#ffcc00', fontSize: '0.8rem', fontWeight: 'bold' }} value={editValues.mos} onChange={e => setEditValues({ ...editValues, mos: e.target.value })} />
                                             ) : (
-                                                <span className="orbitron" style={{ fontSize: '1rem', fontWeight: '900', color: '#ffcc00' }}>{record.awards?.mos || 'N/A'}</span>
+                                                <span className="orbitron" style={{ fontSize: '1.2rem', fontWeight: '950', color: '#ffcc00' }}>{record.awards?.mos || 'N/A'}</span>
                                             )}
                                         </div>
                                     </div>

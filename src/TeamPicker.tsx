@@ -1,59 +1,76 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
-import { Users, Zap, Shield, Sword, RefreshCw, Check, X } from 'lucide-react';
-import { PLAYER_DATA, WICC_MEMBERS } from './types';
+import { Users, Zap, Shield, Sword, RefreshCw, Check, X, Edit3, Plus } from 'lucide-react';
+import { type PlayerProfile } from './types';
 
 export const TeamPicker: React.FC<{ isOpen: boolean, onClose: () => void, onComplete: () => void }> = ({ isOpen, onClose, onComplete }) => {
-    const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
+    const [players, setPlayers] = useState<PlayerProfile[]>([]);
     const [teamA, setTeamA] = useState<string[]>([]);
     const [teamB, setTeamB] = useState<string[]>([]);
-    const [teamAName, setTeamAName] = useState('TEAM BLUE');
-    const [teamBName, setTeamBName] = useState('TEAM ORANGE');
     const [loading, setLoading] = useState(false);
+    const [editMode, setEditMode] = useState(false);
+    const [editingPlayer, setEditingPlayer] = useState<PlayerProfile | null>(null);
+
+    useEffect(() => {
+        if (isOpen) {
+            fetchPlayers();
+        }
+    }, [isOpen]);
+
+    const fetchPlayers = async () => {
+        const { data } = await supabase.from('wicc_players').select('*').order('name');
+        if (data) setPlayers(data);
+    };
 
     if (!isOpen) return null;
 
-    const togglePlayer = (name: string) => {
-        setSelectedPlayers(prev =>
-            prev.includes(name) ? prev.filter(p => p !== name) : [...prev, name]
-        );
+    const movePlayer = (name: string, target: 'A' | 'B' | 'pool') => {
+        // Remove from everywhere
+        setTeamA(prev => prev.filter(p => p !== name));
+        setTeamB(prev => prev.filter(p => p !== name));
+
+        // Add to target
+        if (target === 'A') setTeamA(prev => [...prev, name]);
+        if (target === 'B') setTeamB(prev => [...prev, name]);
     };
 
     const autoBalance = () => {
-        if (selectedPlayers.length < 2) return;
+        const selected = [...teamA, ...teamB];
+        if (selected.length < 2) return;
 
-        // Simple intelligent balancing
-        // 1. Sort selected players by skill
-        const sorted = [...selectedPlayers].sort((a, b) => (PLAYER_DATA[b]?.skill || 0) - (PLAYER_DATA[a]?.skill || 0));
+        const sorted = selected.sort((a, b) => {
+            const pA = players.find(p => p.name === a)?.skill || 5;
+            const pB = players.find(p => p.name === b)?.skill || 5;
+            return pB - pA;
+        });
 
         const tA: string[] = [];
         const tB: string[] = [];
-
-        // 2. Snake draft distribution
-        sorted.forEach((player, index) => {
-            if (index % 4 === 0 || index % 4 === 3) {
-                tA.push(player);
-            } else {
-                tB.push(player);
-            }
+        sorted.forEach((p, i) => {
+            if (i % 4 === 0 || i % 4 === 3) tA.push(p); else tB.push(p);
         });
-
         setTeamA(tA);
         setTeamB(tB);
     };
 
+    const handleSavePlayer = async (player: PlayerProfile) => {
+        setLoading(true);
+        const { error } = await supabase.from('wicc_players').upsert(player);
+        if (!error) {
+            setEditingPlayer(null);
+            fetchPlayers();
+        }
+        setLoading(false);
+    };
+
     const handleCommit = async () => {
         setLoading(true);
-        // Clear current members and insert new ones
-        await supabase.from('wicc_members').delete().neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
-
+        await supabase.from('wicc_members').delete().neq('id', '00000000-0000-0000-0000-000000000000');
         const newMembers = [
             ...teamA.map(name => ({ name, team: 'blue' })),
             ...teamB.map(name => ({ name, team: 'orange' }))
         ];
-
         const { error } = await supabase.from('wicc_members').insert(newMembers);
-
         if (!error) {
             onComplete();
             onClose();
@@ -62,124 +79,116 @@ export const TeamPicker: React.FC<{ isOpen: boolean, onClose: () => void, onComp
     };
 
     return (
-        <div className="history-modal">
-            <div className="container" style={{ maxWidth: '1000px' }}>
-                <div className="flex-between" style={{ marginBottom: '2rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <Users size={32} color="var(--accent-cyan)" />
-                        <h1 className="orbitron" style={{ fontSize: '1.8rem', fontWeight: '950' }}>TEAM SELECTION</h1>
-                    </div>
-                    <button onClick={onClose} className="btn-outline btn-red-outline">
-                        <X size={20} />
+        <div className="team-picker-widget">
+            <div className="flex-between" style={{ marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                    <Users size={20} color="var(--accent-cyan)" />
+                    <span className="orbitron" style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>TEAM PICKER</span>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button onClick={() => setEditMode(!editMode)} className={`btn-outline ${editMode ? 'btn-red-outline' : 'btn-blue-outline'}`} style={{ padding: '4px 8px' }}>
+                        {editMode ? <Check size={14} /> : <Edit3 size={14} />}
+                    </button>
+                    <button onClick={onClose} className="btn-outline btn-red-outline" style={{ padding: '4px 8px' }}>
+                        <X size={14} />
                     </button>
                 </div>
+            </div>
 
-                <div className="grid-2" style={{ gap: '2rem', alignItems: 'start' }}>
-                    {/* Left: Player Pool */}
-                    <div className="card" style={{ background: 'rgba(255,255,255,0.02)' }}>
-                        <h2 className="orbitron" style={{ fontSize: '1rem', marginBottom: '1.5rem', color: 'var(--accent-cyan)' }}>PLAYER POOL ({selectedPlayers.length})</h2>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem', maxHeight: '500px', overflowY: 'auto', paddingRight: '0.5rem' }}>
-                            {WICC_MEMBERS.map(name => {
-                                const p = PLAYER_DATA[name];
-                                const isSelected = selectedPlayers.includes(name);
-                                return (
-                                    <div
-                                        key={name}
-                                        className={`player-select-card ${isSelected ? 'active' : ''}`}
-                                        onClick={() => togglePlayer(name)}
-                                    >
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span className="mono" style={{ fontWeight: 'bold' }}>{name}</span>
-                                            <div style={{ display: 'flex', gap: '4px' }}>
-                                                {p.sports.includes('cricket') && <span>🏏</span>}
-                                                {p.sports.includes('tennis') && <span>🎾</span>}
-                                            </div>
-                                        </div>
-                                        <div style={{ fontSize: '0.6rem', opacity: 0.6, marginTop: '4px' }}>
-                                            {p.department} | {p.role}
-                                        </div>
-                                    </div>
-                                );
-                            })}
+            {editingPlayer ? (
+                <div className="card" style={{ padding: '1rem', marginBottom: '1rem', border: '1px solid var(--accent-cyan)' }}>
+                    <h3 className="orbitron" style={{ fontSize: '0.7rem', marginBottom: '1rem' }}>EDIT PLAYER</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                        <input placeholder="Name" value={editingPlayer.name} onChange={e => setEditingPlayer({ ...editingPlayer, name: e.target.value })} />
+                        <input placeholder="Department" value={editingPlayer.department} onChange={e => setEditingPlayer({ ...editingPlayer, department: e.target.value })} />
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <div style={{ flex: 1 }}>
+                                <label className="form-label">Skill (1-10)</label>
+                                <input type="number" min="1" max="10" value={editingPlayer.skill} onChange={e => setEditingPlayer({ ...editingPlayer, skill: parseInt(e.target.value) })} />
+                            </div>
                         </div>
-                        <button
-                            className="btn-commit orbitron"
-                            style={{ width: '100%', marginTop: '1.5rem' }}
-                            onClick={autoBalance}
-                            disabled={selectedPlayers.length < 2}
-                        >
-                            <Zap size={14} style={{ marginRight: '8px' }} /> AUTO BALANCE
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button onClick={() => handleSavePlayer(editingPlayer)} className="btn-commit orbitron" style={{ flex: 1, fontSize: '0.7rem' }}>SAVE</button>
+                            <button onClick={() => setEditingPlayer(null)} className="btn-outline btn-red-outline" style={{ flex: 1, fontSize: '0.7rem' }}>CANCEL</button>
+                        </div>
+                    </div>
+                </div>
+            ) : null}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {/* Pool Section */}
+                <div className="pool-section" style={{ minHeight: '100px', background: 'rgba(0,0,0,0.2)', padding: '0.8rem', borderRadius: '12px' }}>
+                    <div className="flex-between">
+                        <span className="orbitron" style={{ fontSize: '0.65rem', opacity: 0.6 }}>AVAILABLE PLAYERS</span>
+                        <button onClick={() => { setEditingPlayer({ name: '', department: 'All-rounder', sports: ['cricket'], role: 'All-rounder', skill: 5 }) }} className="btn-outline btn-blue-outline" style={{ padding: '2px 6px', height: '20px' }}>
+                            <Plus size={10} />
                         </button>
                     </div>
-
-                    {/* Right: Teams Preview */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                        <div className="card card-blue" style={{ minHeight: '200px' }}>
-                            <div className="flex-between" style={{ marginBottom: '1rem' }}>
-                                <input
-                                    className="orbitron"
-                                    style={{ background: 'transparent', border: 'none', color: '#00e5ff', fontWeight: 'bold', fontSize: '1.1rem' }}
-                                    value={teamAName}
-                                    onChange={e => setTeamAName(e.target.value)}
-                                />
-                                <Shield size={20} color="#00e5ff" />
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.8rem' }}>
+                        {players.filter(p => !teamA.includes(p.name) && !teamB.includes(p.name)).map(p => (
+                            <div key={p.name} style={{ position: 'relative' }}>
+                                <span
+                                    className="roster-tag mono"
+                                    style={{ cursor: 'pointer', fontSize: '0.65rem' }}
+                                    onClick={() => movePlayer(p.name, 'A')}
+                                >
+                                    {p.name}
+                                </span>
+                                {editMode && (
+                                    <Edit3
+                                        size={10}
+                                        style={{ position: 'absolute', top: '-5px', right: '-5px', background: 'var(--accent-cyan)', borderRadius: '50%', padding: '2px', cursor: 'pointer' }}
+                                        onClick={(e) => { e.stopPropagation(); setEditingPlayer(p); }}
+                                    />
+                                )}
                             </div>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                {teamA.map(p => (
-                                    <span key={p} className="roster-tag mono">{p}</span>
-                                ))}
-                                {teamA.length === 0 && <div className="orbitron opacity-30" style={{ fontSize: '0.7rem' }}>NO PLAYERS ASSIGNED</div>}
-                            </div>
-                        </div>
-
-                        <div className="card card-orange" style={{ minHeight: '200px' }}>
-                            <div className="flex-between" style={{ marginBottom: '1rem' }}>
-                                <input
-                                    className="orbitron"
-                                    style={{ background: 'transparent', border: 'none', color: '#ff7300', fontWeight: 'bold', fontSize: '1.1rem' }}
-                                    value={teamBName}
-                                    onChange={e => setTeamBName(e.target.value)}
-                                />
-                                <Sword size={20} color="#ff7300" />
-                            </div>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                {teamB.map(p => (
-                                    <span key={p} className="roster-tag mono">{p}</span>
-                                ))}
-                                {teamB.length === 0 && <div className="orbitron opacity-30" style={{ fontSize: '0.7rem' }}>NO PLAYERS ASSIGNED</div>}
-                            </div>
-                        </div>
-
-                        <button
-                            className="btn-commit orbitron"
-                            style={{ height: '50px', fontSize: '1.1rem', background: 'linear-gradient(45deg, #22c55e, #10b981)' }}
-                            onClick={handleCommit}
-                            disabled={loading || (teamA.length === 0 && teamB.length === 0)}
-                        >
-                            {loading ? <RefreshCw className="spin" /> : <><Check size={20} style={{ marginRight: '10px' }} /> CONFIRM TEAMS</>}
-                        </button>
+                        ))}
                     </div>
+                </div>
+
+                <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div style={{ background: 'rgba(0, 162, 255, 0.05)', padding: '0.8rem', borderRadius: '12px', border: '1px solid rgba(0, 162, 255, 0.2)' }}>
+                        <div className="flex-between">
+                            <span className="orbitron" style={{ fontSize: '0.6rem', color: 'var(--team-blue)' }}>BLUE</span>
+                            <Shield size={12} color="var(--team-blue)" />
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.8rem' }}>
+                            {teamA.map(name => (
+                                <span key={name} className="roster-tag mono" style={{ cursor: 'pointer', fontSize: '0.6rem', borderColor: 'var(--team-blue)' }} onClick={() => movePlayer(name, 'B')}>
+                                    {name}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                    <div style={{ background: 'rgba(255, 115, 0, 0.05)', padding: '0.8rem', borderRadius: '12px', border: '1px solid rgba(255, 115, 0, 0.2)' }}>
+                        <div className="flex-between">
+                            <span className="orbitron" style={{ fontSize: '0.6rem', color: 'var(--team-orange)' }}>ORANGE</span>
+                            <Sword size={12} color="var(--team-orange)" />
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.8rem' }}>
+                            {teamB.map(name => (
+                                <span key={name} className="roster-tag mono" style={{ cursor: 'pointer', fontSize: '0.6rem', borderColor: 'var(--team-orange)' }} onClick={() => movePlayer(name, 'pool')}>
+                                    {name}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button className="btn-commit orbitron" style={{ flex: 1, height: '36px', fontSize: '0.65rem' }} onClick={autoBalance}>
+                        <Zap size={10} style={{ marginRight: '5px' }} /> AUTO
+                    </button>
+                    <button className="btn-commit orbitron" style={{ flex: 2, height: '36px', fontSize: '0.65rem', background: '#22c55e' }} onClick={handleCommit} disabled={loading}>
+                        {loading ? <RefreshCw size={12} className="spin" /> : <><Check size={12} style={{ marginRight: '5px' }} /> CONFIRM</>}
+                    </button>
+                    <button className="btn-outline btn-red-outline" style={{ height: '36px', padding: '0 10px' }} onClick={() => { setTeamA([]); setTeamB([]); }}>
+                        <X size={12} />
+                    </button>
                 </div>
             </div>
 
             <style>{`
-                .player-select-card {
-                    padding: 0.8rem;
-                    background: rgba(255,255,255,0.03);
-                    border: 1px solid rgba(255,255,255,0.05);
-                    border-radius: 8px;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                }
-                .player-select-card:hover {
-                    background: rgba(255,255,255,0.08);
-                    border-color: rgba(0, 229, 255, 0.3);
-                }
-                .player-select-card.active {
-                    background: rgba(0, 229, 255, 0.1);
-                    border-color: var(--accent-cyan);
-                    box-shadow: 0 0 15px rgba(0, 229, 255, 0.15);
-                }
                 .spin { animation: spin 1s linear infinite; }
                 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
             `}</style>

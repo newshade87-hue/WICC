@@ -1,9 +1,10 @@
 export interface PlayerProfile {
+    id?: string;
     name: string;
     department: string;
-    sports: string[]; // ['cricket', 'tennis']
-    role: 'Bowler' | 'Batsman' | 'All-rounder';
-    skill: number; // 1-10 for balancing
+    sports: string[];
+    role: string;
+    skill: number;
 }
 
 export const PLAYER_DATA: Record<string, PlayerProfile> = {
