@@ -11,11 +11,22 @@ export const TeamPicker: React.FC<{ isOpen: boolean, onClose: () => void, onComp
     const [editMode, setEditMode] = useState(false);
     const [editingPlayer, setEditingPlayer] = useState<PlayerProfile | null>(null);
 
+    const [quickAddName, setQuickAddName] = useState('');
+
     useEffect(() => {
         if (isOpen) {
             fetchPlayers();
+            fetchCurrentTeams();
         }
     }, [isOpen]);
+
+    const fetchCurrentTeams = async () => {
+        const { data } = await supabase.from('wicc_members').select('*');
+        if (data) {
+            setTeamA(data.filter(m => m.team === 'blue').map(m => m.name));
+            setTeamB(data.filter(m => m.team === 'orange').map(m => m.name));
+        }
+    };
 
     const fetchPlayers = async () => {
         const { data } = await supabase.from('wicc_players').select('*').order('name');
@@ -64,6 +75,25 @@ export const TeamPicker: React.FC<{ isOpen: boolean, onClose: () => void, onComp
             fetchPlayers();
         } else {
             alert("Error saving: " + error.message);
+        }
+        setLoading(false);
+    };
+
+    const handleQuickAdd = async () => {
+        if (!quickAddName.trim()) return;
+        setLoading(true);
+        const { error } = await supabase.from('wicc_players').insert({
+            name: quickAddName.trim(),
+            role: 'All Rounder',
+            department: 'New Player',
+            sports: ['cricket']
+        });
+
+        if (!error) {
+            setQuickAddName('');
+            fetchPlayers();
+        } else {
+            alert('Error adding player: ' + error.message);
         }
         setLoading(false);
     };
@@ -123,7 +153,7 @@ export const TeamPicker: React.FC<{ isOpen: boolean, onClose: () => void, onComp
                     style={{
                         cursor: editMode ? 'default' : 'grab',
                         borderColor: location === 'A' ? 'var(--team-blue)' : (location === 'B' ? 'var(--team-orange)' : undefined),
-                        opacity: editMode ? 0.7 : 1
+                        opacity: editMode ? 1 : 1
                     }}
                 >
                     {!editMode && <GripVertical size={10} style={{ opacity: 0.3, marginRight: 2 }} />}
@@ -132,12 +162,22 @@ export const TeamPicker: React.FC<{ isOpen: boolean, onClose: () => void, onComp
                     {name}
                 </span>
                 {editMode && (
-                    <Edit3
-                        size={14}
-                        color="black"
-                        style={{ position: 'absolute', top: -7, right: -7, background: 'var(--accent-cyan)', borderRadius: '50%', padding: '2px', cursor: 'pointer', zIndex: 20, border: '1px solid white' }}
-                        onClick={(e) => { e.stopPropagation(); setEditingPlayer(p as PlayerProfile); }}
-                    />
+                    <div style={{ position: 'absolute', top: -8, right: -8, display: 'flex', gap: '2px', zIndex: 20 }}>
+                        <div
+                            onClick={(e) => { e.stopPropagation(); setEditingPlayer(p as PlayerProfile); }}
+                            style={{ background: 'var(--accent-cyan)', borderRadius: '50%', padding: '3px', cursor: 'pointer', border: '1px solid black' }}
+                        >
+                            <Edit3 size={10} color="black" />
+                        </div>
+                        {p.id && (
+                            <div
+                                onClick={(e) => { e.stopPropagation(); handleDeletePlayer(p.id!); }}
+                                style={{ background: '#ef4444', borderRadius: '50%', padding: '3px', cursor: 'pointer', border: '1px solid black' }}
+                            >
+                                <X size={10} color="white" />
+                            </div>
+                        )}
+                    </div>
                 )}
             </div>
         );
@@ -215,13 +255,30 @@ export const TeamPicker: React.FC<{ isOpen: boolean, onClose: () => void, onComp
                 >
                     <div className="flex-between">
                         <span className="orbitron" style={{ fontSize: '0.65rem', opacity: 0.6 }}>AVAILABLE PLAYERS</span>
-                        <button
-                            onClick={() => setEditingPlayer({ name: '', department: 'All Rounder', sports: ['cricket'], role: 'All Rounder' })}
-                            className="btn-outline btn-blue-outline"
-                            style={{ padding: '2px 6px', height: '24px', fontSize: '10px' }}
-                        >
-                            <Plus size={10} style={{ marginRight: '4px' }} /> NEW PLAYER
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <input
+                                placeholder="Add & Enter..."
+                                value={quickAddName}
+                                onChange={e => setQuickAddName(e.target.value)}
+                                onKeyDown={e => { if (e.key === 'Enter') handleQuickAdd(); }}
+                                style={{
+                                    background: 'rgba(0,0,0,0.3)',
+                                    border: '1px solid var(--accent-cyan)',
+                                    color: 'var(--accent-cyan)',
+                                    fontSize: '0.7rem',
+                                    padding: '2px 6px',
+                                    borderRadius: '4px',
+                                    width: '120px'
+                                }}
+                            />
+                            <button
+                                onClick={handleQuickAdd}
+                                className="btn-outline btn-blue-outline"
+                                style={{ padding: '2px 6px', height: '24px', fontSize: '10px' }}
+                            >
+                                <Plus size={10} />
+                            </button>
+                        </div>
                     </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.8rem' }}>
                         {players.filter(p => !teamA.includes(p.name) && !teamB.includes(p.name)).map(p => renderPlayerTag(p.name, 'pool'))}
