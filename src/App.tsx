@@ -213,8 +213,25 @@ const Dashboard: React.FC = () => {
         <div className="subtitle-container">
           <div className="line line-blue"></div>
           <span className="orbitron" style={{ fontSize: '12px', color: '#00e5ff', fontWeight: 'bold', letterSpacing: '0.8em' }}>PREMIER RECORDER</span>
-          <button onClick={isAdmin ? lock : showPinPrompt} style={{ background: 'none', border: 'none', cursor: 'pointer', marginLeft: '10px' }}>
-            {isAdmin ? <Unlock size={14} color="#22c55e" /> : <Lock size={14} color="#64748b" />}
+          <button
+            onClick={isAdmin ? lock : showPinPrompt}
+            style={{
+              background: isAdmin ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+              border: isAdmin ? '1px solid #22c55e' : '1px solid #ef4444',
+              borderRadius: '50%',
+              width: '30px',
+              height: '30px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              marginLeft: '15px',
+              transition: 'all 0.3s ease',
+              boxShadow: isAdmin ? '0 0 10px rgba(34, 197, 94, 0.2)' : '0 0 10px rgba(239, 68, 68, 0.2)'
+            }}
+            title={isAdmin ? "Click to Lock" : "Click to Unlock"}
+          >
+            {isAdmin ? <Unlock size={14} color="#22c55e" /> : <Lock size={14} color="#ef4444" />}
           </button>
           <div className="line line-orange"></div>
         </div>
