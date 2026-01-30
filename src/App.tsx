@@ -216,22 +216,29 @@ const Dashboard: React.FC = () => {
           <button
             onClick={isAdmin ? lock : showPinPrompt}
             style={{
-              background: isAdmin ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-              border: isAdmin ? '1px solid #22c55e' : '1px solid #ef4444',
+              background: isAdmin ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+              border: isAdmin ? '2px solid #22c55e' : '2px solid #ef4444',
               borderRadius: '50%',
-              width: '30px',
-              height: '30px',
+              width: '35px',
+              height: '35px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              marginLeft: '15px',
-              transition: 'all 0.3s ease',
-              boxShadow: isAdmin ? '0 0 10px rgba(34, 197, 94, 0.2)' : '0 0 10px rgba(239, 68, 68, 0.2)'
+              marginLeft: '20px',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              boxShadow: isAdmin
+                ? '0 0 20px rgba(34, 197, 94, 0.6), inset 0 0 10px rgba(34, 197, 94, 0.4)'
+                : '0 0 20px rgba(239, 68, 68, 0.6), inset 0 0 10px rgba(239, 68, 68, 0.4)',
+              transform: 'scale(1.05)'
             }}
             title={isAdmin ? "Click to Lock" : "Click to Unlock"}
           >
-            {isAdmin ? <Unlock size={14} color="#22c55e" /> : <Lock size={14} color="#ef4444" />}
+            {isAdmin ? (
+              <Unlock size={18} color="#22c55e" style={{ filter: 'drop-shadow(0 0 5px #22c55e)' }} />
+            ) : (
+              <Lock size={18} color="#ef4444" style={{ filter: 'drop-shadow(0 0 5px #ef4444)' }} />
+            )}
           </button>
           <div className="line line-orange"></div>
         </div>
