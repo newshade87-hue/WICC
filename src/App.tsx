@@ -179,12 +179,22 @@ const Dashboard: React.FC = () => {
     link.click();
   };
 
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    try {
+      const [y, m, d] = dateStr.split('-');
+      return `${d}-${m}-${y.slice(2)}`;
+    } catch (e) {
+      return dateStr;
+    }
+  };
+
   const exportToExcel = () => {
     const headers = ['Date', 'Match', 'Team 1', 'Score 1', 'Team 2', 'Score 2', 'Winner', 'Points', 'MOM'];
     const csvContent = [
       headers.join(','),
       ...matches.map(m => [
-        m.date,
+        formatDate(m.date),
         m.matchnumber,
         m.teamonename,
         m.teamonescore,
@@ -307,7 +317,7 @@ const Dashboard: React.FC = () => {
           <tbody className="mono">
             {matches.map((m) => (
               <tr key={m.id} className="table-row-hover">
-                <td style={{ color: '#94a3b8' }}>{m.date}</td>
+                <td style={{ color: '#94a3b8' }}>{formatDate(m.date)}</td>
                 <td style={{ color: '#00e5ff', fontWeight: 'bold', textAlign: 'center' }}>{m.matchnumber}</td>
                 <td>{m.teamonescore} {m.innings === '2-Innings' && <span style={{ opacity: 0.5, fontSize: '0.7rem' }}>({m.teamoneinn1}+{m.teamoneinn2})</span>}</td>
                 <td>{m.teamtwoscore} {m.innings === '2-Innings' && <span style={{ opacity: 0.5, fontSize: '0.7rem' }}>({m.teamtwoinn1}+{m.teamtwoinn2})</span>}</td>
