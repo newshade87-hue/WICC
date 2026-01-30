@@ -19,9 +19,18 @@ import { AdminProvider, useAdmin } from './AdminContext';
 const Dashboard: React.FC = () => {
   const [matches, setMatches] = useState<MatchData[]>([]);
   const [seriesInfo, setSeriesInfo] = useState<any>(null);
-  const [teamOneName, setTeamOneName] = useState('TEAM BLUE');
-  const [teamTwoName, setTeamTwoName] = useState('TEAM ORANGE');
+  const [teamOneName, setTeamOneName] = useState(() => localStorage.getItem('teamOneName') || 'TEAM BLUE');
+  const [teamTwoName, setTeamTwoName] = useState(() => localStorage.getItem('teamTwoName') || 'TEAM ORANGE');
   const [editingMatch, setEditingMatch] = useState<MatchData | null>(null);
+
+  // Persist Team Names
+  useEffect(() => {
+    localStorage.setItem('teamOneName', teamOneName);
+  }, [teamOneName]);
+
+  useEffect(() => {
+    localStorage.setItem('teamTwoName', teamTwoName);
+  }, [teamTwoName]);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isTeamPickerOpen, setIsTeamPickerOpen] = useState(false);
   const [blueMembers, setBlueMembers] = useState<TeamMember[]>([]);
