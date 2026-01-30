@@ -469,6 +469,7 @@ const Dashboard: React.FC = () => {
           score={`${totals.ptsA}-${totals.ptsB}`}
           onReset={handleArchive}
           isAdmin={isAdmin}
+          winningColor={champion === teamOneName ? '#00a2ff' : '#ff7300'}
         />
       )}
 

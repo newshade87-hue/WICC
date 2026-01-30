@@ -6,9 +6,10 @@ interface VictoryModalProps {
     score: string;
     onReset: () => void;
     isAdmin: boolean;
+    winningColor: string;
 }
 
-export const VictoryModal: React.FC<VictoryModalProps> = ({ winner, score, onReset, isAdmin }) => {
+export const VictoryModal: React.FC<VictoryModalProps> = ({ winner, score, onReset, isAdmin, winningColor }) => {
 
     useEffect(() => {
         const duration = 15 * 1000;
@@ -25,6 +26,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({ winner, score, onRes
             }
 
             const particleCount = 50 * (timeLeft / duration);
+            // Use winning colors for confetti if possible, or random
             confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
             confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
         }, 250);
@@ -40,28 +42,28 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({ winner, score, onRes
             padding: '2rem'
         }}>
             <div style={{
-                background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(0, 0, 0, 0.95))',
-                border: '4px solid var(--accent-cyan)',
+                background: `linear-gradient(135deg, rgba(15, 23, 42, 0.95), ${winningColor}20)`,
+                border: `4px solid ${winningColor}`,
                 borderRadius: '30px',
                 padding: '4rem',
                 textAlign: 'center',
                 maxWidth: '800px',
                 width: '100%',
-                boxShadow: '0 0 150px rgba(0, 229, 255, 0.3)',
+                boxShadow: `0 0 150px ${winningColor}50`,
                 animation: 'victoryPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
             }}>
                 <div className="orbitron" style={{ fontSize: '1.5rem', color: '#94a3b8', marginBottom: '1rem', letterSpacing: '0.2em' }}>
-                    SERIES CHAMPION
+                    CRICKET LEGENDS
                 </div>
 
                 <h1 className="orbitron" style={{
                     fontSize: '5rem',
                     fontWeight: 900,
                     marginBottom: '0.5rem',
-                    background: 'linear-gradient(to right, #00e5ff, #fff, #00e5ff)',
+                    background: `linear-gradient(to right, #fff, ${winningColor}, #fff)`,
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
-                    textShadow: '0 0 50px rgba(0, 229, 255, 0.8)',
+                    textShadow: `0 0 50px ${winningColor}`,
                     lineHeight: 1
                 }}>
                     {winner}
@@ -74,7 +76,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({ winner, score, onRes
                     fontWeight: 'bold',
                     textShadow: '0 0 20px rgba(255,255,255,0.5)'
                 }}>
-                    WON {score}
+                    LIFT THE TROPHY ({score})
                 </div>
 
                 {isAdmin && (

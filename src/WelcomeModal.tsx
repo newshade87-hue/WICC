@@ -44,13 +44,13 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ onClose, teamOneName
                     WebkitTextFillColor: 'transparent',
                     textShadow: '0 0 30px rgba(0, 229, 255, 0.5)'
                 }}>
-                    ARE YOU READY?
+                    THE PITCH IS READY
                 </h1>
 
                 <p className="mono" style={{ color: '#94a3b8', fontSize: '1.2rem', marginBottom: '3rem', lineHeight: '1.6' }}>
-                    The stage is set. <br />
+                    The tossing coin is spinning. <br />
                     <span style={{ color: '#00a2ff', fontWeight: 'bold' }}>{teamOneName}</span> vs <span style={{ color: '#ff7300', fontWeight: 'bold' }}>{teamTwoName}</span>.<br />
-                    Let the series begin!
+                    Let the battle of the willow begin!
                 </p>
 
                 <button
@@ -77,7 +77,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ onClose, teamOneName
                         e.currentTarget.style.boxShadow = '0 0 30px rgba(0, 229, 255, 0.6)';
                     }}
                 >
-                    LET'S PLAY
+                    PLAY BALL
                 </button>
             </div>
             <style>{`
