@@ -15,6 +15,8 @@ import { TeamPicker } from './TeamPicker';
 import { Users } from 'lucide-react';
 import type { TeamMember } from './types';
 import { AdminProvider, useAdmin } from './AdminContext';
+import { WelcomeModal } from './WelcomeModal';
+import { VictoryModal } from './VictoryModal';
 
 const Dashboard: React.FC = () => {
   const [matches, setMatches] = useState<MatchData[]>([]);
@@ -31,10 +33,14 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('teamTwoName', teamTwoName);
   }, [teamTwoName]);
+
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isTeamPickerOpen, setIsTeamPickerOpen] = useState(false);
   const [blueMembers, setBlueMembers] = useState<TeamMember[]>([]);
   const [orangeMembers, setOrangeMembers] = useState<TeamMember[]>([]);
+
+  // Gamification State
+  const [showWelcome, setShowWelcome] = useState(false);
 
   const { isAdmin, showPinPrompt, lock } = useAdmin();
 
@@ -56,7 +62,16 @@ const Dashboard: React.FC = () => {
       .from('wicc_members')
       .select('*');
 
-    if (mData) setMatches(mData);
+    if (mData) {
+      setMatches(mData);
+      if (mData.length === 0) {
+        // If no matches, check if we've shown welcome purely locally for this session OR if series was just reset
+        // For now, simpler: if matches == 0, show welcome.
+        setShowWelcome(true);
+      } else {
+        setShowWelcome(false);
+      }
+    }
     if (sData) setSeriesInfo(sData);
     if (memData) {
       setBlueMembers(memData.filter(m => m.team === 'blue'));
@@ -74,7 +89,20 @@ const Dashboard: React.FC = () => {
     return acc;
   }, { ptsA: 0, ptsB: 0 });
 
-  const champion = totals.ptsA >= 10 ? teamOneName : totals.ptsB >= 10 ? teamTwoName : null;
+  // WIN LOGIC: Target 10pts OR 8-0 Mercy Rule
+  let champion = null;
+  const targetReached = totals.ptsA >= 10 || totals.ptsB >= 10;
+  const mercyRuleA = totals.ptsA >= 8 && totals.ptsB === 0;
+  const mercyRuleB = totals.ptsB >= 8 && totals.ptsA === 0;
+
+  if (targetReached) {
+    champion = totals.ptsA > totals.ptsB ? teamOneName : teamTwoName;
+  } else if (mercyRuleA) {
+    champion = teamOneName;
+  } else if (mercyRuleB) {
+    champion = teamTwoName;
+  }
+
   const inLead = totals.ptsA > totals.ptsB ? teamOneName : totals.ptsB > totals.ptsA ? teamTwoName : 'DRAW';
 
   const handleDelete = async (id: string) => {
@@ -426,6 +454,23 @@ const Dashboard: React.FC = () => {
           <RotateCcw size={18} />
         </button>
       </div>
+      {/* Modals */}
+      {showWelcome && matches.length === 0 && (
+        <WelcomeModal
+          onClose={() => setShowWelcome(false)}
+          teamOneName={teamOneName}
+          teamTwoName={teamTwoName}
+        />
+      )}
+
+      {champion && (
+        <VictoryModal
+          winner={champion}
+          score={`${totals.ptsA}-${totals.ptsB}`}
+          onReset={handleArchive}
+          isAdmin={isAdmin}
+        />
+      )}
 
       <HistoryView isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} />
       <TeamPicker isOpen={isTeamPickerOpen} onClose={() => setIsTeamPickerOpen(false)} onComplete={fetchData} />
