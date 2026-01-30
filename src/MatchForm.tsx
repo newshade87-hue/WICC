@@ -25,6 +25,8 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
         teamoneinn2: '0',
         teamtwoinn1: '0',
         teamtwoinn2: '0',
+        teamonepoints: '0',
+        teamtwopoints: '0',
         overs: '',
         resulttype: '',
         mom: '',
@@ -33,10 +35,14 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
         moi2: '',
     });
 
+    // Track if user has manually edited points to avoid overwriting
+    const [pointsEdited, setPointsEdited] = useState(false);
+
     useEffect(() => {
         if (editingMatch) {
             setFormData(editingMatch);
             setFormat(editingMatch.innings);
+            setPointsEdited(true); // Treat existing records as "edited" so we don't auto-change them on load usually
         } else {
             setFormData({
                 date: new Date().toISOString().split('T')[0],
@@ -47,6 +53,8 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
                 teamoneinn2: '0',
                 teamtwoinn1: '0',
                 teamtwoinn2: '0',
+                teamonepoints: '0',
+                teamtwopoints: '0',
                 overs: '',
                 resulttype: '',
                 mom: '',
@@ -55,35 +63,55 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
                 moi2: '',
             });
             setFormat('1-Inning');
+            setPointsEdited(false);
         }
     }, [editingMatch, matchesCount, teamOneName, teamTwoName]);
 
-    const totals = useMemo(() => {
+    // Auto-calculate points logic
+    useEffect(() => {
+        if (pointsEdited) return;
+
         const t1 = parseInt(formData.teamoneinn1 || '0') + (format === '2-Innings' ? parseInt(formData.teamoneinn2 || '0') : 0);
         const t2 = parseInt(formData.teamtwoinn1 || '0') + (format === '2-Innings' ? parseInt(formData.teamtwoinn2 || '0') : 0);
         const { pts1, pts2 } = calculatePoints(format, t1, t2);
+
+        setFormData(prev => {
+            if (prev.teamonepoints === pts1.toString() && prev.teamtwopoints === pts2.toString()) return prev;
+            return {
+                ...prev,
+                teamonepoints: pts1.toString(),
+                teamtwopoints: pts2.toString()
+            };
+        });
+    }, [formData.teamoneinn1, formData.teamoneinn2, formData.teamtwoinn1, formData.teamtwoinn2, format, pointsEdited]);
+
+    const winMargin = useMemo(() => {
+        const t1 = parseInt(formData.teamoneinn1 || '0') + (format === '2-Innings' ? parseInt(formData.teamoneinn2 || '0') : 0);
+        const t2 = parseInt(formData.teamtwoinn1 || '0') + (format === '2-Innings' ? parseInt(formData.teamtwoinn2 || '0') : 0);
 
         let winmargin = '';
         if (t1 > t2) winmargin = `${t1 - t2} Runs`;
         else if (t2 > t1) winmargin = `${t2 - t1} Runs`;
         else winmargin = 'Draw';
-
-        return { t1, t2, pts1, pts2, winmargin };
-    }, [formData, format]);
+        return winmargin;
+    }, [formData.teamoneinn1, formData.teamoneinn2, formData.teamtwoinn1, formData.teamtwoinn2, format]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+
+        // Calculate scores for storing
+        const t1 = parseInt(formData.teamoneinn1 || '0') + (format === '2-Innings' ? parseInt(formData.teamoneinn2 || '0') : 0);
+        const t2 = parseInt(formData.teamtwoinn1 || '0') + (format === '2-Innings' ? parseInt(formData.teamtwoinn2 || '0') : 0);
+
         const payload = {
             ...formData,
             innings: format,
             teamonename: teamOneName,
             teamtwoname: teamTwoName,
-            teamonescore: totals.t1.toString(),
-            teamtwoscore: totals.t2.toString(),
-            teamonepoints: totals.pts1.toString(),
-            teamtwopoints: totals.pts2.toString(),
-            winmargin: totals.winmargin,
+            teamonescore: t1.toString(),
+            teamtwoscore: t2.toString(),
+            winmargin: winMargin,
         };
 
         if (editingMatch?.id) {
@@ -169,7 +197,7 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
                     </div>
                     <div className="form-group">
                         <label className="form-label orbitron">WON BY</label>
-                        <div style={{ background: 'var(--input-bg)', padding: '0.7rem', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', textAlign: 'center', fontSize: '0.75rem', fontWeight: 'bold' }}>{totals.winmargin}</div>
+                        <div style={{ background: 'var(--input-bg)', padding: '0.7rem', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', textAlign: 'center', fontSize: '0.75rem', fontWeight: 'bold' }}>{winMargin}</div>
                     </div>
                     <div className="form-group">
                         <button type="submit" className={`btn-commit orbitron ${editingMatch ? 'btn-update' : ''}`} disabled={loading} style={{ background: editingMatch ? 'var(--accent-cyan)' : 'white' }}>
@@ -200,11 +228,21 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
                     </div>
                     <div className="form-group" style={{ gridColumn: 'span 1' }}>
                         <label className="form-label orbitron" style={{ color: '#00a2ff' }}>{teamOneName} PTS</label>
-                        <div style={{ background: 'var(--input-bg)', border: '1px solid var(--team-blue)', padding: '0.6rem', borderRadius: '8px', textAlign: 'center', fontSize: '1.5rem', fontWeight: '900', color: '#00a2ff' }}>{totals.pts1}</div>
+                        <input
+                            type="number"
+                            style={{ textAlign: 'center', background: 'var(--input-bg)', border: '1px solid var(--team-blue)', color: '#00a2ff', fontWeight: '900', fontSize: '1.2rem' }}
+                            value={formData.teamonepoints}
+                            onChange={e => { setPointsEdited(true); setFormData({ ...formData, teamonepoints: e.target.value }); }}
+                        />
                     </div>
                     <div className="form-group" style={{ gridColumn: 'span 1' }}>
                         <label className="form-label orbitron" style={{ color: '#ff7300' }}>{teamTwoName} PTS</label>
-                        <div style={{ background: 'var(--input-bg)', border: '1px solid var(--team-orange)', padding: '0.6rem', borderRadius: '8px', textAlign: 'center', fontSize: '1.5rem', fontWeight: '900', color: '#ff7300' }}>{totals.pts2}</div>
+                        <input
+                            type="number"
+                            style={{ textAlign: 'center', background: 'var(--input-bg)', border: '1px solid var(--team-orange)', color: '#ff7300', fontWeight: '900', fontSize: '1.2rem' }}
+                            value={formData.teamtwopoints}
+                            onChange={e => { setPointsEdited(true); setFormData({ ...formData, teamtwopoints: e.target.value }); }}
+                        />
                     </div>
                 </div>
             </form>
