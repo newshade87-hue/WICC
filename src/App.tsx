@@ -1,10 +1,12 @@
+
+
 import React, { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 import { MatchForm } from './MatchForm';
 import { AwardsHub } from './AwardsHub';
 import { ExportTool } from './ExportTool';
 import type { MatchData } from './types';
-import { Trash2, Edit2, Download, RotateCcw, Camera, History } from 'lucide-react';
+import { Trash2, Edit2, Download, RotateCcw, Camera, History, Lock, Unlock } from 'lucide-react';
 import wiccLogo from './assets/wicc_logo.png';
 import html2canvas from 'html2canvas';
 import { HistoryView } from './HistoryView';
@@ -12,8 +14,9 @@ import { RosterWidget } from './RosterWidget';
 import { TeamPicker } from './TeamPicker';
 import { Users } from 'lucide-react';
 import type { TeamMember } from './types';
+import { AdminProvider, useAdmin } from './AdminContext';
 
-const App: React.FC = () => {
+const Dashboard: React.FC = () => {
   const [matches, setMatches] = useState<MatchData[]>([]);
   const [seriesInfo, setSeriesInfo] = useState<any>(null);
   const [teamOneName, setTeamOneName] = useState('TEAM BLUE');
@@ -23,6 +26,8 @@ const App: React.FC = () => {
   const [isTeamPickerOpen, setIsTeamPickerOpen] = useState(false);
   const [blueMembers, setBlueMembers] = useState<TeamMember[]>([]);
   const [orangeMembers, setOrangeMembers] = useState<TeamMember[]>([]);
+
+  const { isAdmin, showPinPrompt, lock } = useAdmin();
 
   const fetchData = async () => {
     const { data: mData } = await supabase
@@ -64,13 +69,38 @@ const App: React.FC = () => {
   const inLead = totals.ptsA > totals.ptsB ? teamOneName : totals.ptsB > totals.ptsA ? teamTwoName : 'DRAW';
 
   const handleDelete = async (id: string) => {
+    if (!isAdmin) {
+      showPinPrompt();
+      return;
+    }
     if (window.confirm('Are you sure you want to delete this match record?')) {
       const { error } = await supabase.from('wicc_matches').delete().eq('id', id);
       if (!error) fetchData();
     }
   };
 
+  const handleEditClick = (m: MatchData) => {
+    if (!isAdmin) {
+      showPinPrompt();
+      return;
+    }
+    setEditingMatch(m);
+    document.getElementById('match-form')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleTeamSelectionClick = () => {
+    if (!isAdmin) {
+      showPinPrompt();
+      return;
+    }
+    setIsTeamPickerOpen(true);
+  };
+
   const handleArchive = async () => {
+    if (!isAdmin) {
+      showPinPrompt();
+      return;
+    }
     if (window.confirm('This will archive all current matches and reset the series. Continue?')) {
       // 1. Prepare Summary
       const startDate = matches.length > 0 ? matches[matches.length - 1].date : new Date().toISOString().split('T')[0];
@@ -183,6 +213,9 @@ const App: React.FC = () => {
         <div className="subtitle-container">
           <div className="line line-blue"></div>
           <span className="orbitron" style={{ fontSize: '12px', color: '#00e5ff', fontWeight: 'bold', letterSpacing: '0.8em' }}>PREMIER RECORDER</span>
+          <button onClick={isAdmin ? lock : showPinPrompt} style={{ background: 'none', border: 'none', cursor: 'pointer', marginLeft: '10px' }}>
+            {isAdmin ? <Unlock size={14} color="#22c55e" /> : <Lock size={14} color="#64748b" />}
+          </button>
           <div className="line line-orange"></div>
         </div>
       </header>
@@ -212,17 +245,19 @@ const App: React.FC = () => {
         <input
           className="team-tab tab-blue orbitron"
           value={teamOneName}
-          onChange={e => setTeamOneName(e.target.value.toUpperCase())}
+          onChange={e => { if (isAdmin) setTeamOneName(e.target.value.toUpperCase()) }}
           placeholder="TEAM BLUE NAME"
           spellCheck={false}
+          readOnly={!isAdmin}
         />
         <span className="vs-text orbitron">VS</span>
         <input
           className="team-tab tab-orange orbitron"
           value={teamTwoName}
-          onChange={e => setTeamTwoName(e.target.value.toUpperCase())}
+          onChange={e => { if (isAdmin) setTeamTwoName(e.target.value.toUpperCase()) }}
           placeholder="TEAM ORANGE NAME"
           spellCheck={false}
+          readOnly={!isAdmin}
         />
       </div>
 
@@ -292,8 +327,18 @@ const App: React.FC = () => {
                 </td>
                 <td style={{ textAlign: 'center' }}>
                   <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                    <Edit2 size={14} className="text-cyan-500 cursor-pointer hover:scale-110 transition" onClick={() => { setEditingMatch(m); document.getElementById('match-form')?.scrollIntoView({ behavior: 'smooth' }); }} />
-                    <Trash2 size={16} className="text-red-500 cursor-pointer hover:scale-110 transition" onClick={() => handleDelete(m.id!)} />
+                    <Edit2
+                      size={14}
+                      className="text-cyan-500 cursor-pointer hover:scale-110 transition"
+                      style={{ opacity: isAdmin ? 1 : 0.3 }}
+                      onClick={() => handleEditClick(m)}
+                    />
+                    <Trash2
+                      size={16}
+                      className="text-red-500 cursor-pointer hover:scale-110 transition"
+                      style={{ opacity: isAdmin ? 1 : 0.3 }}
+                      onClick={() => handleDelete(m.id!)}
+                    />
                   </div>
                 </td>
               </tr>
@@ -305,33 +350,37 @@ const App: React.FC = () => {
         </table>
       </div>
 
-      <MatchForm
-        onSave={() => { fetchData(); setEditingMatch(null); }}
-        teamOneName={teamOneName}
-        teamTwoName={teamTwoName}
-        matchesCount={matches.length}
-        editingMatch={editingMatch}
-        onCancel={() => setEditingMatch(null)}
-      />
+      <div style={{ opacity: isAdmin ? 1 : 0.5, pointerEvents: isAdmin ? 'auto' : 'none', position: 'relative' }}>
+        {!isAdmin && <div onClick={showPinPrompt} style={{ position: 'absolute', inset: 0, zIndex: 10, cursor: 'pointer' }}></div>}
+        <MatchForm
+          onSave={() => { fetchData(); setEditingMatch(null); }}
+          teamOneName={teamOneName}
+          teamTwoName={teamTwoName}
+          matchesCount={matches.length}
+          editingMatch={editingMatch}
+          onCancel={() => setEditingMatch(null)}
+        />
+      </div>
+
       {seriesInfo && <AwardsHub onUpdate={fetchData} seriesData={seriesInfo} />}
       {seriesInfo && <ExportTool series={{ ...seriesInfo, ptsA: totals.ptsA, ptsB: totals.ptsB, champion }} />}
 
       {/* Bottom Action Bar */}
-      <div className="bottom-bar btn-snapshot-hide">
-        <button onClick={takeScreenshot} className="btn-outline btn-blue-outline">
-          <Camera size={14} /> SNAPSHOT
+      <div className="bottom-bar btn-snapshot-hide" style={{ gap: '0.4rem', padding: '0.5rem' }}>
+        <button onClick={takeScreenshot} className="btn-outline btn-blue-outline" title="Snapshot">
+          <Camera size={18} />
         </button>
-        <button onClick={exportToExcel} className="btn-outline btn-blue-outline">
-          <Download size={14} /> EXCEL
+        <button onClick={exportToExcel} className="btn-outline btn-blue-outline" title="Export Excel">
+          <Download size={18} />
         </button>
-        <button onClick={() => setIsTeamPickerOpen(true)} className="btn-outline btn-blue-outline btn-flash">
-          <Users size={14} /> TEAM SELECTION
+        <button onClick={handleTeamSelectionClick} className="btn-outline btn-blue-outline btn-flash" style={{ flex: 2, justifyContent: 'center' }}>
+          <Users size={14} style={{ marginRight: '6px' }} /> TEAMS
         </button>
-        <button onClick={() => setIsHistoryOpen(true)} className="btn-outline btn-blue-outline">
-          <History size={14} /> HISTORY
+        <button onClick={() => setIsHistoryOpen(true)} className="btn-outline btn-blue-outline" style={{ flex: 1, justifyContent: 'center' }}>
+          <History size={14} style={{ marginRight: '6px' }} /> LOGS
         </button>
-        <button onClick={handleArchive} className="btn-outline btn-red-outline">
-          <RotateCcw size={14} /> RESET
+        <button onClick={handleArchive} className="btn-outline btn-red-outline" title="Reset Series">
+          <RotateCcw size={18} />
         </button>
       </div>
 
@@ -340,5 +389,11 @@ const App: React.FC = () => {
     </div >
   );
 };
+
+const App: React.FC = () => (
+  <AdminProvider>
+    <Dashboard />
+  </AdminProvider>
+);
 
 export default App;
