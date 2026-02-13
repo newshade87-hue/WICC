@@ -6,7 +6,7 @@ import { MatchForm } from './MatchForm';
 import { AwardsHub } from './AwardsHub';
 import { ExportTool } from './ExportTool';
 import type { MatchData } from './types';
-import { Trash2, Edit2, Download, RotateCcw, Camera, History, Lock, Unlock } from 'lucide-react';
+import { Trash2, Edit2, Download, RotateCcw, Camera, History, Lock, Unlock, Sun, Moon } from 'lucide-react';
 import wiccLogo from './assets/wicc_logo.png';
 import html2canvas from 'html2canvas';
 import { HistoryView } from './HistoryView';
@@ -42,6 +42,16 @@ const Dashboard: React.FC = () => {
   // Gamification State
   const [showWelcome, setShowWelcome] = useState(false);
   const [dismissedVictory, setDismissedVictory] = useState(false);
+  const [theme, setTheme] = useState(() => localStorage.getItem('wicc-theme') || 'dark');
+
+  useEffect(() => {
+    localStorage.setItem('wicc-theme', theme);
+    if (theme === 'light') {
+      document.body.classList.add('light-mode');
+    } else {
+      document.body.classList.remove('light-mode');
+    }
+  }, [theme]);
 
   const { isAdmin, showPinPrompt, lock } = useAdmin();
 
@@ -266,6 +276,26 @@ const Dashboard: React.FC = () => {
         <div className="subtitle-container">
           <div className="line line-blue"></div>
           <span className="orbitron" style={{ fontSize: '12px', color: '#00e5ff', fontWeight: 'bold', letterSpacing: '0.8em' }}>PREMIER RECORDER</span>
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid var(--border-glass)',
+              borderRadius: '50%',
+              width: '35px',
+              height: '35px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              marginLeft: '20px',
+              color: 'var(--text-primary)',
+              transition: 'all 0.3s'
+            }}
+            title={`Toggle ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+          >
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           <button
             onClick={isAdmin ? lock : showPinPrompt}
             style={{
