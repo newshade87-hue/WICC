@@ -5,11 +5,12 @@ interface VictoryModalProps {
     winner: string;
     score: string;
     onReset: () => void;
+    onClose: () => void;
     isAdmin: boolean;
     winningColor: string;
 }
 
-export const VictoryModal: React.FC<VictoryModalProps> = ({ winner, score, onReset, isAdmin, winningColor }) => {
+export const VictoryModal: React.FC<VictoryModalProps> = ({ winner, score, onReset, onClose, isAdmin, winningColor }) => {
 
     useEffect(() => {
         const duration = 15 * 1000;
@@ -79,14 +80,45 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({ winner, score, onRes
                     LIFT THE TROPHY ({score})
                 </div>
 
-                {isAdmin && (
+                <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                    {isAdmin && (
+                        <button
+                            onClick={onReset}
+                            className="orbitron"
+                            style={{
+                                background: 'transparent',
+                                color: '#ef4444',
+                                border: '2px solid #ef4444',
+                                padding: '1rem 2rem',
+                                fontSize: '1rem',
+                                fontWeight: 900,
+                                borderRadius: '12px',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s',
+                                letterSpacing: '0.1em'
+                            }}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.background = '#ef4444';
+                                e.currentTarget.style.color = 'white';
+                                e.currentTarget.style.boxShadow = '0 0 30px rgba(239, 68, 68, 0.5)';
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.background = 'transparent';
+                                e.currentTarget.style.color = '#ef4444';
+                                e.currentTarget.style.boxShadow = 'none';
+                            }}
+                        >
+                            ARCHIVE & START NEW SERIES
+                        </button>
+                    )}
+
                     <button
-                        onClick={onReset}
+                        onClick={onClose}
                         className="orbitron"
                         style={{
                             background: 'transparent',
-                            color: '#ef4444',
-                            border: '2px solid #ef4444',
+                            color: winningColor,
+                            border: `2px solid ${winningColor}`,
                             padding: '1rem 2rem',
                             fontSize: '1rem',
                             fontWeight: 900,
@@ -96,19 +128,19 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({ winner, score, onRes
                             letterSpacing: '0.1em'
                         }}
                         onMouseEnter={e => {
-                            e.currentTarget.style.background = '#ef4444';
+                            e.currentTarget.style.background = winningColor;
                             e.currentTarget.style.color = 'white';
-                            e.currentTarget.style.boxShadow = '0 0 30px rgba(239, 68, 68, 0.5)';
+                            e.currentTarget.style.boxShadow = `0 0 30px ${winningColor}50`;
                         }}
                         onMouseLeave={e => {
                             e.currentTarget.style.background = 'transparent';
-                            e.currentTarget.style.color = '#ef4444';
+                            e.currentTarget.style.color = winningColor;
                             e.currentTarget.style.boxShadow = 'none';
                         }}
                     >
-                        ARCHIVE & START NEW SERIES
+                        GO BACK & EDIT SERIES
                     </button>
-                )}
+                </div>
             </div>
             <style>{`
                 @keyframes victoryPop {

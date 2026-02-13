@@ -41,6 +41,7 @@ const Dashboard: React.FC = () => {
 
   // Gamification State
   const [showWelcome, setShowWelcome] = useState(false);
+  const [dismissedVictory, setDismissedVictory] = useState(false);
 
   const { isAdmin, showPinPrompt, lock } = useAdmin();
 
@@ -57,6 +58,8 @@ const Dashboard: React.FC = () => {
       .select('*')
       .limit(1)
       .single();
+
+    setDismissedVictory(false);
 
     const { data: memData } = await supabase
       .from('wicc_members')
@@ -166,7 +169,10 @@ const Dashboard: React.FC = () => {
       // 4. Reset awards in current series
       const { error: seriesError } = await supabase.from('wicc_series').update({ awards: { mos: '', mvp: '', wickets: '', runs: '', catches: '' } }).eq('id', seriesInfo.id);
 
-      if (!matchError && !seriesError) fetchData();
+      if (!matchError && !seriesError) {
+        setDismissedVictory(false);
+        fetchData();
+      }
     }
   };
 
@@ -463,11 +469,12 @@ const Dashboard: React.FC = () => {
         />
       )}
 
-      {champion && (
+      {champion && !dismissedVictory && (
         <VictoryModal
           winner={champion}
           score={`${totals.ptsA}-${totals.ptsB}`}
           onReset={handleArchive}
+          onClose={() => setDismissedVictory(true)}
           isAdmin={isAdmin}
           winningColor={champion === teamOneName ? '#00a2ff' : '#ff7300'}
         />
