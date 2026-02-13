@@ -125,9 +125,9 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
     };
 
     return (
-        <div id="match-form" className={`form-card ${editingMatch ? 'editing-active' : ''}`} style={{ transition: 'all 0.5s', border: editingMatch ? '2px solid var(--accent-cyan)' : '1px solid rgba(255,255,255,0.05)' }}>
+        <div id="match-form" className={`form-card ${editingMatch ? 'editing-active' : ''}`} style={{ transition: 'all 0.5s', border: editingMatch ? '2px solid var(--accent-cyan)' : '1px solid var(--border-glass)' }}>
             <div className="flex-between" style={{ marginBottom: '1.5rem' }}>
-                <h3 className="orbitron" style={{ fontSize: '1rem', color: editingMatch ? 'var(--accent-cyan)' : 'white' }}>
+                <h3 className="orbitron" style={{ fontSize: '1rem', color: editingMatch ? 'var(--accent-cyan)' : 'var(--text-primary)' }}>
                     {editingMatch ? 'EDIT MATCH RECORD' : 'RECORD NEW MATCH'}
                 </h3>
                 {editingMatch && (
@@ -197,10 +197,10 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
                     </div>
                     <div className="form-group">
                         <label className="form-label orbitron">WON BY</label>
-                        <div style={{ background: 'var(--input-bg)', padding: '0.7rem', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', textAlign: 'center', fontSize: '0.75rem', fontWeight: 'bold' }}>{winMargin}</div>
+                        <div style={{ background: 'var(--input-bg)', padding: '0.7rem', border: '1px solid var(--border-glass)', borderRadius: '8px', textAlign: 'center', fontSize: '0.75rem', fontWeight: 'bold' }}>{winMargin}</div>
                     </div>
                     <div className="form-group">
-                        <button type="submit" className={`btn-commit orbitron ${editingMatch ? 'btn-update' : ''}`} disabled={loading} style={{ background: editingMatch ? 'var(--accent-cyan)' : 'white' }}>
+                        <button type="submit" className={`btn-commit orbitron ${editingMatch ? 'btn-update' : ''}`} disabled={loading} style={{ background: editingMatch ? 'var(--accent-cyan)' : 'var(--text-primary)', color: editingMatch ? 'black' : 'var(--bg-deep)' }}>
                             {editingMatch ? 'UPDATE' : 'COMMIT'}
                         </button>
                     </div>

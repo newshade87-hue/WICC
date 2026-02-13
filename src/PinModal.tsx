@@ -27,7 +27,7 @@ export const PinModal: React.FC<PinModalProps> = ({ isOpen, onClose, onUnlock })
     return (
         <div style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(5px)',
+            background: 'var(--bg-deep)', opacity: 0.95, backdropFilter: 'blur(5px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
         }}>
             <div className="card" style={{ width: '90%', maxWidth: '320px', padding: '1.5rem', border: '1px solid var(--accent-cyan)' }}>
@@ -57,7 +57,9 @@ export const PinModal: React.FC<PinModalProps> = ({ isOpen, onClose, onUnlock })
                             fontSize: '1.2rem',
                             letterSpacing: '0.3em',
                             padding: '0.8rem',
-                            border: error ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.2)'
+                            background: 'var(--input-bg)',
+                            color: 'var(--text-primary)',
+                            border: error ? '1px solid #ef4444' : '1px solid var(--border-glass)'
                         }}
                     />
 

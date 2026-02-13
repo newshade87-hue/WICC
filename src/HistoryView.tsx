@@ -80,7 +80,7 @@ export const HistoryView: React.FC<{ isOpen: boolean, onClose: () => void }> = (
                 <div className="flex-between" style={{ marginBottom: '3rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <History size={32} color="var(--accent-cyan)" />
-                        <h1 className="orbitron" style={{ fontSize: '2rem', fontWeight: '950', textShadow: '0 0 20px rgba(0, 229, 255, 0.4)' }}>SERIES HISTORY</h1>
+                        <h1 className="orbitron" style={{ fontSize: '2rem', fontWeight: '950', color: 'var(--text-primary)' }}>SERIES HISTORY</h1>
                     </div>
                     <button onClick={onClose} className="btn-outline btn-red-outline" style={{ borderRadius: '50%', width: '40px', height: '40px', padding: 0 }}>
                         <X size={20} />
@@ -114,7 +114,7 @@ export const HistoryView: React.FC<{ isOpen: boolean, onClose: () => void }> = (
                                 {editingId === record.id ? (
                                     <input
                                         className="orbitron"
-                                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--accent-cyan)', color: 'white', width: '100%', marginBottom: '0.5rem', padding: '0.2rem' }}
+                                        style={{ background: 'var(--input-bg)', border: '1px solid var(--accent-cyan)', color: 'var(--text-primary)', width: '100%', marginBottom: '0.5rem', padding: '0.2rem' }}
                                         value={editValues.winner}
                                         onChange={e => setEditValues({ ...editValues, winner: e.target.value })}
                                     />
@@ -127,9 +127,9 @@ export const HistoryView: React.FC<{ isOpen: boolean, onClose: () => void }> = (
                                 <div className="flex-between" style={{ background: 'rgba(0,0,0,0.3)', padding: '0.75rem', borderRadius: '10px', marginBottom: '1.5rem' }}>
                                     {editingId === record.id ? (
                                         <>
-                                            <input type="number" style={{ width: '40px', background: 'transparent', border: 'none', borderBottom: '1px solid gray', color: 'white' }} value={editValues.points_a} onChange={e => setEditValues({ ...editValues, points_a: e.target.value })} />
+                                            <input type="number" style={{ width: '40px', background: 'transparent', border: 'none', borderBottom: '1px solid gray', color: 'var(--text-primary)' }} value={editValues.points_a} onChange={e => setEditValues({ ...editValues, points_a: e.target.value })} />
                                             <div className="orbitron" style={{ fontSize: '0.8rem', opacity: 0.5 }}>VS</div>
-                                            <input type="number" style={{ width: '40px', background: 'transparent', border: 'none', borderBottom: '1px solid gray', color: 'white' }} value={editValues.points_b} onChange={e => setEditValues({ ...editValues, points_b: e.target.value })} />
+                                            <input type="number" style={{ width: '40px', background: 'transparent', border: 'none', borderBottom: '1px solid gray', color: 'var(--text-primary)' }} value={editValues.points_b} onChange={e => setEditValues({ ...editValues, points_b: e.target.value })} />
                                         </>
                                     ) : (
                                         <>
@@ -148,7 +148,7 @@ export const HistoryView: React.FC<{ isOpen: boolean, onClose: () => void }> = (
                                             {editingId === record.id ? (
                                                 <input style={{ background: 'transparent', border: 'none', color: '#ffcc00', fontSize: '0.8rem', fontWeight: 'bold' }} value={editValues.mos} onChange={e => setEditValues({ ...editValues, mos: e.target.value })} />
                                             ) : (
-                                                <span className="orbitron" style={{ fontSize: '1.2rem', fontWeight: '950', color: '#ffcc00' }}>{record.awards?.mos || 'N/A'}</span>
+                                                <span className="orbitron" style={{ fontSize: '1.2rem', fontWeight: '950', color: record.winner.includes('BLUE') ? 'var(--team-blue)' : 'var(--team-orange)' }}>{record.awards?.mos || 'N/A'}</span>
                                             )}
                                         </div>
                                     </div>
@@ -179,9 +179,9 @@ export const HistoryView: React.FC<{ isOpen: boolean, onClose: () => void }> = (
                                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                                             <span className="orbitron" style={{ fontSize: '0.55rem' }}>RUNS</span>
                                             {editingId === record.id ? (
-                                                <input style={{ background: 'transparent', border: 'none', color: 'white', fontSize: '0.6rem' }} value={editValues.runs} onChange={e => setEditValues({ ...editValues, runs: e.target.value })} />
+                                                <input style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '0.6rem' }} value={editValues.runs} onChange={e => setEditValues({ ...editValues, runs: e.target.value })} />
                                             ) : (
-                                                <span className="orbitron" style={{ fontSize: '0.7rem' }}>{record.awards?.runs || 'N/A'}</span>
+                                                <span className="orbitron" style={{ fontSize: '0.7rem', color: 'var(--text-primary)' }}>{record.awards?.runs || 'N/A'}</span>
                                             )}
                                         </div>
                                     </div>
