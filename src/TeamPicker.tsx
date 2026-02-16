@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
-import { Users, Shield, Sword, RefreshCw, Check, X, Edit3, Plus, Trash, GripVertical, Zap, Wind, Activity, Target } from 'lucide-react';
+import { Users, Shield, Sword, RefreshCw, Check, X, Edit3, Plus, Trash } from 'lucide-react';
 import { type PlayerProfile } from './types';
 
 export const TeamPicker: React.FC<{ isOpen: boolean, onClose: () => void, onComplete: () => void }> = ({ isOpen, onClose, onComplete }) => {
@@ -126,16 +126,8 @@ export const TeamPicker: React.FC<{ isOpen: boolean, onClose: () => void, onComp
 
     const ROLE_OPTIONS = ['All Rounder', 'Fast Bowler', 'Medium Bowler', 'Batting Only', 'Spinner'];
 
-    const getRoleIcon = (role?: string) => {
-        switch (role) {
-            case 'All Rounder': return <Zap size={10} color="#fbbf24" />;
-            case 'Fast Bowler': return <Activity size={10} color="#f87171" />;
-            case 'Medium Bowler': return <Wind size={10} color="#60a5fa" />;
-            case 'Batting Only': return <Target size={10} color="#4ade80" />;
-            case 'Spinner': return <RefreshCw size={10} color="#a78bfa" />;
-            default: return <Users size={10} color="#94a3b8" />;
-        }
-    };
+
+
 
     const renderPlayerTag = (name: string, location: 'pool' | 'A' | 'B') => {
         const p = players.find(pl => pl.name === name) || { name, role: 'All Rounder' } as PlayerProfile;
@@ -156,9 +148,6 @@ export const TeamPicker: React.FC<{ isOpen: boolean, onClose: () => void, onComp
                         opacity: editMode ? 1 : 1
                     }}
                 >
-                    {!editMode && <GripVertical size={10} style={{ opacity: 0.3, marginRight: 2 }} />}
-                    {/* @ts-ignore */}
-                    <span style={{ marginRight: 4, display: 'flex', alignItems: 'center' }}>{getRoleIcon(p.role)}</span>
                     {name}
                 </span>
                 {editMode && (
