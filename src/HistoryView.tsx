@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+x`import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 import { Trophy, Calendar, Zap, Star, Award, Shield, X, History, Trash2, Edit2, Check } from 'lucide-react';
 
@@ -133,9 +133,9 @@ export const HistoryView: React.FC<{ isOpen: boolean, onClose: () => void }> = (
                                         </>
                                     ) : (
                                         <>
-                                            <div className="orbitron" style={{ fontSize: '0.8rem' }}>BLUE: {record.points_a} PTS</div>
+                                            <div className="orbitron" style={{ fontSize: '0.8rem' }}>{record.team_a_name || 'BLUE'}: {record.points_a} PTS</div>
                                             <div className="orbitron" style={{ fontSize: '0.8rem', opacity: 0.5 }}>VS</div>
-                                            <div className="orbitron" style={{ fontSize: '0.8rem' }}>ORANGE: {record.points_b} PTS</div>
+                                            <div className="orbitron" style={{ fontSize: '0.8rem' }}>{record.team_b_name || 'ORANGE'}: {record.points_b} PTS</div>
                                         </>
                                     )}
                                 </div>

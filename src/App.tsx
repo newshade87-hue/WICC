@@ -162,6 +162,8 @@ const Dashboard: React.FC = () => {
         points_b: totals.ptsB,
         start_date: startDate,
         end_date: endDate,
+        team_a_name: teamOneName,
+        team_b_name: teamTwoName,
         awards: seriesInfo?.awards || {}
       };
 
@@ -343,6 +345,61 @@ const Dashboard: React.FC = () => {
           <span className="card-value orbitron text-white">{totals.ptsB}</span>
         </div>
       </div>
+
+      {/* END SERIES Banner - shown when champion determined and victory modal dismissed */}
+      {champion && dismissedVictory && (
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(255, 115, 0, 0.15))',
+          border: '2px solid #ef4444',
+          borderRadius: '16px',
+          padding: '1.5rem 2rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '1rem',
+          marginBottom: '1.5rem',
+          boxShadow: '0 0 40px rgba(239, 68, 68, 0.2)',
+          animation: 'victoryPop 0.5s ease-out'
+        }}>
+          <div>
+            <div className="orbitron" style={{ fontSize: '1.2rem', fontWeight: 900, color: 'white', marginBottom: '0.3rem' }}>
+              🏆 SERIES COMPLETE — {champion} WINS ({totals.ptsA}-{totals.ptsB})
+            </div>
+            <div className="orbitron" style={{ fontSize: '0.65rem', color: '#94a3b8', letterSpacing: '0.05em' }}>
+              Review the table below, then end the series when ready.
+            </div>
+          </div>
+          <button
+            onClick={handleArchive}
+            className="orbitron"
+            style={{
+              background: '#ef4444',
+              color: 'white',
+              border: 'none',
+              padding: '0.8rem 2rem',
+              fontSize: '0.85rem',
+              fontWeight: 900,
+              borderRadius: '12px',
+              cursor: 'pointer',
+              transition: 'all 0.3s',
+              letterSpacing: '0.1em',
+              boxShadow: '0 0 25px rgba(239, 68, 68, 0.4)',
+              opacity: isAdmin ? 1 : 0.5
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.boxShadow = '0 0 40px rgba(239, 68, 68, 0.7)';
+              e.currentTarget.style.transform = 'scale(1.05)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.boxShadow = '0 0 25px rgba(239, 68, 68, 0.4)';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+          >
+            END SERIES & ARCHIVE
+          </button>
+        </div>
+      )}
 
       <RosterWidget blueMembers={blueMembers} orangeMembers={orangeMembers} />
 
