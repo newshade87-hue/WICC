@@ -1,4 +1,4 @@
-x`import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 import { Trophy, Calendar, Zap, Star, Award, Shield, X, History, Trash2, Edit2, Check } from 'lucide-react';
 

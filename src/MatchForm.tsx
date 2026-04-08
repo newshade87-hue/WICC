@@ -11,9 +11,10 @@ interface MatchFormProps {
     matchesCount: number;
     editingMatch: MatchData | null;
     onCancel: () => void;
+    dynamicMembers: string[];
 }
 
-export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamTwoName, matchesCount, editingMatch, onCancel }) => {
+export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamTwoName, matchesCount, editingMatch, onCancel, dynamicMembers }) => {
     const [format, setFormat] = useState<MatchFormat>('1-Inning');
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState<Partial<MatchData>>({
@@ -71,8 +72,14 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
     useEffect(() => {
         if (pointsEdited) return;
 
-        const t1 = parseInt(formData.teamoneinn1 || '0') + (format === '2-Innings' ? parseInt(formData.teamoneinn2 || '0') : 0);
-        const t2 = parseInt(formData.teamtwoinn1 || '0') + (format === '2-Innings' ? parseInt(formData.teamtwoinn2 || '0') : 0);
+        // Parse scores: Extract first number from strings like "100/7(12 overs)"
+        const parseScore = (val: string) => {
+            const match = (val || '').match(/^(\d+)/);
+            return match ? parseInt(match[1]) : 0;
+        };
+
+        const t1 = parseScore(formData.teamoneinn1 || '0') + (format === '2-Innings' ? parseScore(formData.teamoneinn2 || '0') : 0);
+        const t2 = parseScore(formData.teamtwoinn1 || '0') + (format === '2-Innings' ? parseScore(formData.teamtwoinn2 || '0') : 0);
         const { pts1, pts2 } = calculatePoints(format, t1, t2);
 
         setFormData(prev => {
@@ -86,8 +93,13 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
     }, [formData.teamoneinn1, formData.teamoneinn2, formData.teamtwoinn1, formData.teamtwoinn2, format, pointsEdited]);
 
     const winMargin = useMemo(() => {
-        const t1 = parseInt(formData.teamoneinn1 || '0') + (format === '2-Innings' ? parseInt(formData.teamoneinn2 || '0') : 0);
-        const t2 = parseInt(formData.teamtwoinn1 || '0') + (format === '2-Innings' ? parseInt(formData.teamtwoinn2 || '0') : 0);
+        const parseScore = (val: string) => {
+            const match = (val || '').match(/^(\d+)/);
+            return match ? parseInt(match[1]) : 0;
+        };
+
+        const t1 = parseScore(formData.teamoneinn1 || '0') + (format === '2-Innings' ? parseScore(formData.teamoneinn2 || '0') : 0);
+        const t2 = parseScore(formData.teamtwoinn1 || '0') + (format === '2-Innings' ? parseScore(formData.teamtwoinn2 || '0') : 0);
 
         let winmargin = '';
         if (t1 > t2) winmargin = `${t1 - t2} Runs`;
@@ -100,9 +112,14 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
         e.preventDefault();
         setLoading(true);
 
+        const parseScore = (val: string) => {
+            const match = (val || '').match(/^(\d+)/);
+            return match ? parseInt(match[1]) : 0;
+        };
+
         // Calculate scores for storing
-        const t1 = parseInt(formData.teamoneinn1 || '0') + (format === '2-Innings' ? parseInt(formData.teamoneinn2 || '0') : 0);
-        const t2 = parseInt(formData.teamtwoinn1 || '0') + (format === '2-Innings' ? parseInt(formData.teamtwoinn2 || '0') : 0);
+        const t1 = parseScore(formData.teamoneinn1 || '0') + (format === '2-Innings' ? parseScore(formData.teamoneinn2 || '0') : 0);
+        const t2 = parseScore(formData.teamtwoinn1 || '0') + (format === '2-Innings' ? parseScore(formData.teamtwoinn2 || '0') : 0);
 
         const payload = {
             ...formData,
@@ -138,7 +155,7 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
             </div>
 
             <datalist id="members-list">
-                {WICC_MEMBERS.map(m => <option key={m} value={m} />)}
+                {dynamicMembers.map(m => <option key={m} value={m} />)}
             </datalist>
 
             <form onSubmit={handleSubmit} onKeyDown={(e) => {
@@ -169,25 +186,25 @@ export const MatchForm: React.FC<MatchFormProps> = ({ onSave, teamOneName, teamT
 
                     <div className="form-group">
                         <label className="form-label orbitron" style={{ color: '#00a2ff' }}>{teamOneName} INN 1</label>
-                        <input type="number" style={{ textAlign: 'center' }} value={formData.teamoneinn1} onChange={e => setFormData({ ...formData, teamoneinn1: e.target.value })} />
+                        <input type="text" placeholder="100/7(12ov)" style={{ textAlign: 'center' }} value={formData.teamoneinn1} onChange={e => setFormData({ ...formData, teamoneinn1: e.target.value })} />
                     </div>
 
                     {format === '2-Innings' && (
                         <div className="form-group">
                             <label className="form-label orbitron" style={{ color: '#00a2ff' }}>{teamOneName} INN 2</label>
-                            <input type="number" style={{ textAlign: 'center' }} value={formData.teamoneinn2} onChange={e => setFormData({ ...formData, teamoneinn2: e.target.value })} />
+                            <input type="text" placeholder="100/7" style={{ textAlign: 'center' }} value={formData.teamoneinn2} onChange={e => setFormData({ ...formData, teamoneinn2: e.target.value })} />
                         </div>
                     )}
 
                     <div className="form-group">
                         <label className="form-label orbitron" style={{ color: '#ff7300' }}>{teamTwoName} INN 1</label>
-                        <input type="number" style={{ textAlign: 'center' }} value={formData.teamtwoinn1} onChange={e => setFormData({ ...formData, teamtwoinn1: e.target.value })} />
+                        <input type="text" placeholder="100/7" style={{ textAlign: 'center' }} value={formData.teamtwoinn1} onChange={e => setFormData({ ...formData, teamtwoinn1: e.target.value })} />
                     </div>
 
                     {format === '2-Innings' && (
                         <div className="form-group">
                             <label className="form-label orbitron" style={{ color: '#ff7300' }}>{teamTwoName} INN 2</label>
-                            <input type="number" style={{ textAlign: 'center' }} value={formData.teamtwoinn2} onChange={e => setFormData({ ...formData, teamtwoinn2: e.target.value })} />
+                            <input type="text" placeholder="100/7" style={{ textAlign: 'center' }} value={formData.teamtwoinn2} onChange={e => setFormData({ ...formData, teamtwoinn2: e.target.value })} />
                         </div>
                     )}
 

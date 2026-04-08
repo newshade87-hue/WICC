@@ -1,8 +1,10 @@
 import React from 'react';
 import type { TeamMember } from './types';
-import { Users } from 'lucide-react';
+import { Users, Edit3 } from 'lucide-react';
+import { useAdmin } from './AdminContext';
 
-export const RosterWidget: React.FC<{ blueMembers: TeamMember[], orangeMembers: TeamMember[] }> = ({ blueMembers, orangeMembers }) => {
+export const RosterWidget: React.FC<{ blueMembers: TeamMember[], orangeMembers: TeamMember[], onEdit: () => void }> = ({ blueMembers, orangeMembers, onEdit }) => {
+    const { isAdmin, showPinPrompt } = useAdmin();
     return (
         <div className="roster-widget">
             <div className="team-roster-column" style={{ background: 'rgba(0, 162, 255, 0.05)', padding: '0.5rem', borderRadius: '8px', border: '1px solid rgba(0, 162, 255, 0.1)' }}>
@@ -37,9 +39,28 @@ export const RosterWidget: React.FC<{ blueMembers: TeamMember[], orangeMembers: 
                 </div>
             </div>
 
-            <div style={{ position: 'absolute', top: '-10px', right: '20px', background: 'var(--bg-navy)', padding: '0 10px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <div style={{ position: 'absolute', top: '-10px', right: '20px', background: 'var(--bg-navy)', padding: '0 10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Users size={12} color="var(--accent-cyan)" />
-                <span className="orbitron" style={{ fontSize: '10px', color: 'var(--accent-cyan)', fontWeight: 'bold' }}>LIVE ROSTER</span>
+                <span className="orbitron" style={{ fontSize: '10px', color: 'var(--accent-cyan)', fontWeight: 'bold' }}>CURRENT TEAMS</span>
+                <button
+                    onClick={() => isAdmin ? onEdit() : showPinPrompt()}
+                    style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'var(--accent-cyan)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '2px',
+                        marginLeft: '5px',
+                        borderRadius: '4px',
+                        transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(0, 229, 255, 0.1)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                    <Edit3 size={10} />
+                </button>
             </div>
         </div>
     );

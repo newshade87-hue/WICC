@@ -6,8 +6,38 @@ import { WICC_MEMBERS } from './types';
 export const AwardsHub: React.FC<{ onUpdate: () => void, seriesData: any }> = ({ onUpdate, seriesData }) => {
     const [editing, setEditing] = useState(false);
     const [awards, setAwards] = useState({ mos: '', mvp: '', wickets: '', runs: '', catches: '' });
+    const [dynamicMembers, setDynamicMembers] = useState<string[]>([]);
 
-    useEffect(() => { if (seriesData?.awards) setAwards(seriesData.awards); }, [seriesData]);
+    useEffect(() => {
+        if (seriesData?.awards) setAwards(seriesData.awards);
+        fetchDynamicMembers();
+    }, [seriesData]);
+
+    const fetchDynamicMembers = async () => {
+        // Fetch MOM, MOS, MOI names from matches to augment WICC_MEMBERS
+        const { data: matches } = await supabase.from('wicc_matches').select('mom, mos, moi1, moi2');
+        const { data: history } = await supabase.from('wicc_series_history').select('awards');
+
+        const names = new Set(WICC_MEMBERS);
+        if (matches) {
+            matches.forEach(m => {
+                if (m.mom) names.add(m.mom);
+                if (m.mos) names.add(m.mos);
+                if (m.moi1) names.add(m.moi1);
+                if (m.moi2) names.add(m.moi2);
+            });
+        }
+        if (history) {
+            history.forEach(h => {
+                if (h.awards?.mos) names.add(h.awards.mos);
+                if (h.awards?.mvp) names.add(h.awards.mvp);
+                if (h.awards?.wickets) names.add(h.awards.wickets);
+                if (h.awards?.runs) names.add(h.awards.runs);
+                if (h.awards?.catches) names.add(h.awards.catches);
+            });
+        }
+        setDynamicMembers(Array.from(names).sort());
+    };
 
     const handleSaveAwards = async () => {
         const { error } = await supabase.from('wicc_series').update({ awards }).eq('id', seriesData.id);
@@ -22,21 +52,26 @@ export const AwardsHub: React.FC<{ onUpdate: () => void, seriesData: any }> = ({
             </div>
             <div style={{ position: 'relative', zIndex: 1 }}>
                 {editing ? (
-                    <select
-                        style={{
-                            width: '100%',
-                            fontSize: '0.75rem',
-                            background: 'rgba(0,0,0,0.5)',
-                            border: `1px solid ${color}44`,
-                            color: 'white',
-                            padding: '0.5rem'
-                        }}
-                        value={value}
-                        onChange={e => setAwards({ ...awards, [field]: e.target.value })}
-                    >
-                        <option value="">SELECT PLAYER</option>
-                        {WICC_MEMBERS.map(m => <option key={m} value={m}>{m}</option>)}
-                    </select>
+                    <>
+                        <input
+                            list="dynamic-members-list"
+                            style={{
+                                width: '100%',
+                                fontSize: '0.75rem',
+                                background: 'rgba(0,0,0,0.5)',
+                                border: `1px solid ${color}44`,
+                                color: 'white',
+                                padding: '0.5rem',
+                                borderRadius: '4px'
+                            }}
+                            value={value}
+                            placeholder="Type or select..."
+                            onChange={e => setAwards({ ...awards, [field]: e.target.value })}
+                        />
+                        <datalist id="dynamic-members-list">
+                            {dynamicMembers.map(m => <option key={m} value={m} />)}
+                        </datalist>
+                    </>
                 ) : (
                     <div className="flex-between">
                         <span className="orbitron" style={{ fontSize: '0.9rem', fontWeight: 'bold', letterSpacing: '0.05em', color: '#f8fafc' }}>{value || 'PENDING'}</span>

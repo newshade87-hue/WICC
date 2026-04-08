@@ -13,7 +13,7 @@ import { HistoryView } from './HistoryView';
 import { RosterWidget } from './RosterWidget';
 import { TeamPicker } from './TeamPicker';
 import { Users } from 'lucide-react';
-import type { TeamMember } from './types';
+import { type TeamMember, WICC_MEMBERS } from './types';
 import { AdminProvider, useAdmin } from './AdminContext';
 import { WelcomeModal } from './WelcomeModal';
 import { VictoryModal } from './VictoryModal';
@@ -38,6 +38,8 @@ const Dashboard: React.FC = () => {
   const [isTeamPickerOpen, setIsTeamPickerOpen] = useState(false);
   const [blueMembers, setBlueMembers] = useState<TeamMember[]>([]);
   const [orangeMembers, setOrangeMembers] = useState<TeamMember[]>([]);
+  const [viewCount, setViewCount] = useState<number | null>(null);
+  const [dynamicMembers, setDynamicMembers] = useState<string[]>(WICC_MEMBERS);
 
   // Gamification State
   const [showWelcome, setShowWelcome] = useState(false);
@@ -89,6 +91,36 @@ const Dashboard: React.FC = () => {
     if (memData) {
       setBlueMembers(memData.filter(m => m.team === 'blue'));
       setOrangeMembers(memData.filter(m => m.team === 'orange'));
+    }
+
+    // Fetch dynamic members for suggestions
+    const { data: matchesForNames } = await supabase.from('wicc_matches').select('mom, mos, moi1, moi2');
+    const { data: historyForNames } = await supabase.from('wicc_series_history').select('awards');
+    const names = new Set(WICC_MEMBERS);
+    if (matchesForNames) {
+      matchesForNames.forEach(m => {
+        if (m.mom) names.add(m.mom);
+        if (m.mos) names.add(m.mos);
+        if (m.moi1) names.add(m.moi1);
+        if (m.moi2) names.add(m.moi2);
+      });
+    }
+    if (historyForNames) {
+      historyForNames.forEach(h => {
+        if (h.awards?.mos) names.add(h.awards.mos);
+        if (h.awards?.mvp) names.add(h.awards.mvp);
+        if (h.awards?.wickets) names.add(h.awards.wickets);
+        if (h.awards?.runs) names.add(h.awards.runs);
+      });
+    }
+    setDynamicMembers(Array.from(names).sort());
+
+    // Handle View Counter
+    const { data: vData } = await supabase.from('wicc_analytics').select('view_count').eq('id', 'app_views').single();
+    if (vData) {
+      const newCount = (vData.view_count || 0) + 1;
+      setViewCount(newCount);
+      await supabase.from('wicc_analytics').update({ view_count: newCount }).eq('id', 'app_views');
     }
   };
 
@@ -401,7 +433,7 @@ const Dashboard: React.FC = () => {
         </div>
       )}
 
-      <RosterWidget blueMembers={blueMembers} orangeMembers={orangeMembers} />
+      <RosterWidget blueMembers={blueMembers} orangeMembers={orangeMembers} onEdit={handleTeamSelectionClick} />
 
       {/* Action Bar Removed from here, moved to bottom */}
 
@@ -523,6 +555,7 @@ const Dashboard: React.FC = () => {
           matchesCount={matches.length}
           editingMatch={editingMatch}
           onCancel={() => setEditingMatch(null)}
+          dynamicMembers={dynamicMembers}
         />
       </div>
 
@@ -569,6 +602,21 @@ const Dashboard: React.FC = () => {
 
       <HistoryView isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} />
       <TeamPicker isOpen={isTeamPickerOpen} onClose={() => setIsTeamPickerOpen(false)} onComplete={fetchData} />
+
+      {/* View Counter Footer */}
+      {viewCount !== null && (
+        <div style={{
+          marginTop: '4rem',
+          padding: '2rem',
+          borderTop: '1px solid var(--border-glass)',
+          textAlign: 'center',
+          opacity: 0.5
+        }}>
+          <div className="orbitron" style={{ fontSize: '0.6rem', color: '#64748b', letterSpacing: '0.3em' }}>
+            APP VISITS: <span style={{ color: 'var(--accent-cyan)' }}>{viewCount.toLocaleString()}</span>
+          </div>
+        </div>
+      )}
     </div >
   );
 };
