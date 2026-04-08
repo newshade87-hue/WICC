@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 import { Lock, Unlock, Trophy, Zap, Star, Award, Shield } from 'lucide-react';
+import { WICC_MEMBERS } from './types';
 
 export const AwardsHub: React.FC<{ onUpdate: () => void, seriesData: any }> = ({ onUpdate, seriesData }) => {
     const [editing, setEditing] = useState(false);
