@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { supabase } from './supabaseClient';
-import { WICC_MEMBERS, calculatePoints } from './types';
+import { calculatePoints } from './types';
 import type { MatchData, MatchFormat } from './types';
 import { X, Calendar as CalendarIcon } from 'lucide-react';
 
